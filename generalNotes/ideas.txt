@@ -1,0 +1,8 @@
+Some Ideas
+
+Gold and Silver price API written in Java
+https://github.com/bhattumang7/gold-silver-share-price-api-india
+
+The Google Finance API
+https://web.archive.org/web/20111209142224/http://code.google.com/apis/finance/docs/finance-gadgets.html
+    
