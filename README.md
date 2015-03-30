@@ -1,8 +1,8 @@
 # stock-o-matic
-Get on your horse.
+##getOnYourHorse
 
 Welcome to stock-o-matic, making your rediculous amounts of money from Wall Street!
-#getOnYourHorse
+
 
 Let's keep it simple: Here's a list of files and what they do (the files they talk to in parenthesis like this)
 
