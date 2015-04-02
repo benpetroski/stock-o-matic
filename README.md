@@ -1,7 +1,7 @@
 # stock-o-matic
 ##getOnYourHorse
 
-Welcome to stock-o-matic, making your rediculous amounts of money from Wall Street!
+Welcome to stock-o-matic, making you ridiculous amounts of money on Wall Street!
 
 
 Let's keep it simple: Here's a list of files and what they do (the files they talk to in parenthesis like this)
