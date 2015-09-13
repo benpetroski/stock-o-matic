@@ -1,0 +1,27 @@
+Old top 20, from finviz scrape of April 2nd:
+0      A     0.000000
+1   CSMB     0.350855
+2    BUI     0.350855
+3    THQ     0.350855
+4   SYTL     1.274629
+5   SMHD     1.274629
+6   TYNS     1.274629
+7   DFVL     1.274629
+8   WOWO     1.274629
+9   OSMS     1.274629
+10   IWC   810.506237
+11  ACWV   870.529614
+12   DLN   896.455943
+13   MOO   937.971045
+14   GXC  1014.351482
+15  IEUR  1060.677690
+16  NOBL  1077.203930
+17   IEO  1157.866522
+18   RPG  1258.058256
+19   MVV  1260.646904
+
+New top 20, finviz scraped from September 19th:
+
+
+
+

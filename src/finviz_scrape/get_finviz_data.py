@@ -62,7 +62,7 @@ for i, ticker in enumerate(tickers):
         # add the first match of the metric string; also replace metric name with nothing
         data_dict[metric_string] = m.group(0).replace(metric_string, '')
 
-        # write the raw
+        # write the raw data into its file
         with open('data/' + str(tickers[i]) + '.dat', 'w') as f:
             f.write(str(data_dict))
 
