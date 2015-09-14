@@ -5,7 +5,7 @@ import urllib
 
 
 # Number of stock can be found at finviz.com/screen.ashx
-num_stocks = 7059
+num_stocks = 7163
 
 
 # Generate array of url ids (download in increments of 20)
@@ -28,13 +28,17 @@ for num in nums:
 
     # Loop through character by character and look for string
     first = True
+    quote = ''
     for ind, char in enumerate(data):
-        if data[ind:ind+30] == "window.location='quote.ashx?t=":
-            string = data[ind+30:ind+37]
+        if data[ind:ind+22] == '<a href="quote.ashx?t=':
+            string = data[ind+22:ind+30]
             amp = string.index('&')
 
-            quote = string[0:amp]
-            fout.write(quote + '\n')
+            if string[0:amp] != quote:
+                quote = string[0:amp]
+                fout.write(quote + '\n')
+                print quote
+
             if first:
                 first_quote = quote
                 first = False
