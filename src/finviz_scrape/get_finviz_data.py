@@ -8,7 +8,6 @@ from HTMLParser import HTMLParser
 from math import ceil
 import sys
 
-
 class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
