@@ -8,4 +8,21 @@ connection = Connection('localhost', 6789)
 db = connection['stockdata']
 
 # List the collection names to see if we really are looking at the pi ones
-db.collection_names() 
+print db.collection_names() 
+
+query = {}
+query['stockname'] = 'AAPL'
+response = db['stockdata'].find({"stockname":"AAPL"})
+
+
+
+
+
+
+
+
+
+
+
+
+
