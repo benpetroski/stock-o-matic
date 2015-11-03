@@ -15,10 +15,6 @@ today = str(datetime.date.today())
 
 db = connection['stockdata']
 
-import json
-import glob
-from pymongo import MongoClient
-
 directory = '/Users/chris/github/stock-o-matic/src/finviz_scrape/data/*.dat'
 
 print "Beginning backup..."
