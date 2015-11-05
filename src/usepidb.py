@@ -1,7 +1,13 @@
 import pymongo
 from pymongo import Connection
 import datetime
+import sys
 
+# gets all input args. will have to enable capturing multiple tickers, 
+# but for now it's just the one
+inputArgs = []
+for arg in sys.argv[1:]:
+	inputArgs.append(arg)
 
 # generate n number of days back (names of our collections in the mongodb
 numdays = 365 # go back a year
@@ -17,33 +23,29 @@ connection = Connection('localhost', 6789)
 db = connection['stockdata']
 
 # List the collection names to see if we really are looking at the pi ones
-print db.collection_names() 
+print db.collection_names()
 
 # prepare a simple apple query
-query = {}
-query['stockname'] = 'AAPL'
+stocks = []
+variables = ['ticker:%s'%i for i in inputArgs]
+for i, arg in enumerate(inputArgs):
+	stock = {}
+	stock['stockname'] = arg
+	stocks.append(stock)
 
-response = []
-for i in range(0, len(stringdates)):
-	response.append(db[stringdates[i]].find(query)) # nice thing about mongodb - if the date doesn't exist as a collection name, find returns absolutely nothing!
+print stocks
+for s in stocks:
+	response = []
+	for i in range(0, len(stringdates)):
+		response.append(db[stringdates[i]].find(s)) # nice thing about mongodb - if the date doesn't exist as a collection name, find returns absolutely nothing!
 
-documents = []
-print "Apple query returns the following mongodb documents:"
-for i in range(len(response)):
-	for document in response[i]:
-	 	print(document)
-	 	documents.append(document)
+	documents = []
+	print s, 'query returns the following mongodb documents:'
+	for j in range(len(response)):
+		for document in response[j]:
+		 	print(document)
+		 	documents.append(document)
 
-print "Stock prices for AAPL, in reverse chronological order (yes the last one is the price way back on april 2nd!)"
-for i in range(len(documents)):
-	print documents[i]["Price"]
-
-
-
-
-
-
-
-
-
-
+	print 'Stock prices for' , s, 'in reverse chronological order.'
+	for i in range(len(documents)):
+		print documents[i]['Price']
