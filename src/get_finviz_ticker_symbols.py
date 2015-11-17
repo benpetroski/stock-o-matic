@@ -1,10 +1,10 @@
 import requests
+import urllib
 from BeautifulSoup import BeautifulSoup
 from multiprocessing import Pool
 
 # Downloads the ticker symbols from finviz and prints the results to file (ticker_symbols.dat). This must be run before
 # get_finviz_data.py.
-
 
 def get_script(pgnum):
     # Download the ticker, and parse using beautiful soup
@@ -26,7 +26,6 @@ def get_script(pgnum):
         stock.append(str(link[0].text))
 
     return stock
-
 
 # Download an example page to parse the total number of stocks
 html = requests.get("http://finviz.com/screener.ashx")

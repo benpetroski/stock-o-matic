@@ -10,12 +10,10 @@ from FinvizTicker import FinvizTicker
 import sys
 from multiprocessing import Pool
 
-
 def scrapeticker(tickername):
     stock = FinvizTicker(tickername)
     print tickername
     return stock.metrics
-
 
 # Read in ticker symbol list created by get_finviz_ticker_symbols.py
 with open('ticker_symbols.dat') as f:
@@ -25,7 +23,7 @@ with open('ticker_symbols.dat') as f:
     for i, ticker in enumerate(tickers):
         tickers[i] = ticker.replace('\n', '')
 
-# Start 50 processes, as they empty, a new case is fed in
+# Start 100 processes, as they empty, a new case is fed in
 tic = time.clock()
 pool = Pool(processes=100)
 metrics = pool.map(scrapeticker, tickers)

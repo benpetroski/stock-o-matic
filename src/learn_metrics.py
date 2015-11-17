@@ -11,9 +11,9 @@ def hasNumbers(inputString):
     return any(char.isdigit() for char in inputString)
 
 # Open output files - put them right with the other stocks so they will be added as document on the mongoDB database
-g = open('finviz_scrape/data/meanmetrics.dat', 'w')
-h = open('finviz_scrape/data/meandistance.dat', 'w')
-q = open('finviz_scrape/data/top50.dat', 'w')
+g = open('data/meanmetrics.dat', 'w')
+h = open('data/meandistance.dat', 'w')
+q = open('data/top50.dat', 'w')
 
 meanMetricDict = {}
 squaredDistanceDict = {}
@@ -28,17 +28,17 @@ top50Dict['metrictype'] = 'top50'
 top50Dict['version'] = 'v1'
 
 # Read in ticker symbol list as created by get_finviz_ticker_symbols.py
-with open('finviz_scrape/ticker_symbols.dat') as f:
+with open('ticker_symbols.dat') as f:
     tickers = f.readlines()
 
 # Read in metric names
-with open('finviz_scrape/metrics.dat') as f:
+with open('metrics.dat') as f:
     metricNames = f.readlines()
 
 # Create metrics python dict
 metrics = {}
 for i in range(len(tickers)):
-	fname = 'finviz_scrape/data/' + tickers[i].rstrip() + '.dat'
+	fname = 'data/' + tickers[i].rstrip() + '.dat'
 	if(os.path.isfile(fname)):
 		metrics[tickers[i].rstrip()] = eval(open(fname, 'r').read())
 
@@ -56,7 +56,7 @@ for i in range(len(metricNames)):
 	metricSum = 0.0
 	sumCount = 0
 	for j in range(len(tickers)):
-		fname = 'finviz_scrape/data/' + tickers[j].rstrip() + '.dat'
+		fname = 'data/' + tickers[j].rstrip() + '.dat'
 		if(os.path.isfile(fname)):
 			tickers[j] = tickers[j].strip() # remove newline
 			metricNames[i] = metricNames[i].strip() # remove newline
@@ -66,6 +66,10 @@ for i in range(len(metricNames)):
 				metricNames[i] = 'Oper Margin' # another fix
 			if tickers[j] in tickersFrame.keys(): # make sure we actually have that ticker (again... devon's fault)
 				# Skip null values, stock indexs (NASDAQ, SP500, etc) (basically this if statement is to filter out any non-number metrics or wacky ones i didn't feel like fixing)
+				if metricNames[i] not in tickersFrame[tickers[j]].keys():
+					continue # skip this one! 
+
+
 				if tickersFrame[tickers[j]][metricNames[i]] != '-' \
 					and metricNames[i].strip() != 'Index' \
 					and metricNames[i].strip() != 'Income' \
@@ -80,7 +84,7 @@ for i in range(len(metricNames)):
 					fixedstr = fixedstr.rstrip('K')
 					fixedstr = fixedstr.rstrip('B')
 					if hasNumbers(fixedstr) and fixedstr != ' Advantage Municipal Fund 2' and fixedstr != ' Advantage Municipal Fund 3':
-						metricSum = metricSum + float(fixedstr) # given a metric, loop over all stocks, strip % and convert to float!
+						metricSum = metricSum + float(fixedstr.replace(',','')) # given a metric, loop over all stocks, strip % and convert to float!
 						sumCount = sumCount + 1
 	metricSums.append(metricSum)	
 	sumCounts.append(sumCount)		
@@ -99,8 +103,10 @@ squaredDistance = {}
 for i in range(len(tickers)):
 	squaredDistanceSum = 0
 	for j in range(len(metricNames)):
-		fname = 'finviz_scrape/data/' + tickers[i].rstrip() + '.dat'
+		fname = 'data/' + tickers[i].rstrip() + '.dat'
 		if(os.path.isfile(fname)):
+			if metricNames[j] not in tickersFrame[tickers[i]].keys():
+					continue # skip this one! 
 			# Skip null values, stock indexs (NASDAQ, SP500, etc) (basically this if statement is to filter out any non-number metrics or wacky ones i didn't feel like fixing)
 			if tickersFrame[tickers[i].strip()][metricNames[j].strip()] != '-' \
 				and metricNames[j].strip() != 'Index' \
@@ -116,7 +122,7 @@ for i in range(len(tickers)):
 				fixedstr = fixedstr.rstrip('K')
 				fixedstr = fixedstr.rstrip('B')
 				if hasNumbers(fixedstr) and fixedstr != ' Advantage Municipal Fund 2' and fixedstr != ' Advantage Municipal Fund 3':
-					squaredDistanceSum = squaredDistanceSum + (meanMetrics[j] - float(fixedstr))**2 # We have the name indice in the squareddistance vector just for reference at the end
+					squaredDistanceSum = squaredDistanceSum + (meanMetrics[j] - float(fixedstr.replace(',','')))**2 # We have the name indice in the squareddistance vector just for reference at the end
 
 	squaredDistance[tickers[i].strip()] = squaredDistanceSum # create dictionary of stockname -> total distance from mean
 
