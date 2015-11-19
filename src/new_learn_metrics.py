@@ -29,6 +29,7 @@ metricNames.extend(["date", "stockname"])
 metricArrays = stkh.get_metric_as_array(allData, metricNames)
 
 df = pd.DataFrame.from_dict(metricArrays)
+df.fillna(0) # fill NaN's with 0
 
 '''data frames are excellent - and super fast! its essentially a machine version of 
 an excel spreadsheet for example we can sort by any of the keys we want:'''
@@ -37,7 +38,7 @@ stkh.analyze_by_style(df, "highrisk")
 
 stkh.analyze_by_style(df, "moderate")
 
-stkh.analyze_by_style(df, "moderate")
+stkh.analyze_by_style(df, "stable")
 
 #stkh.analyze_by_ab(df) # this one is still under construction due to annoying data cleaning issues
 

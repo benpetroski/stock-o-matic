@@ -129,8 +129,24 @@ for i in range(len(tickers)):
 # Sort stocks by deviation from mean (insightful? Not really at all! but its just a start)
 sorted_sD = sorted(squaredDistance.items(), key=operator.itemgetter(1))
 sortedFrame = DataFrame(sorted_sD)
-sortedFrame[1:10].plot(kind='barh')
-sortedFrame[11:20].plot(kind='barh')
+
+# sortedFrame[1:10].plot(kind='barh')
+# sortedFrame[11:20].plot(kind='barh')
+
+plotsize = 60
+names = list(sortedFrame[0:plotsize][0]) # stock ticker names
+values = list(sortedFrame[0:plotsize][1]) # squared distance to mean market
+
+plt.figure(1)
+ax = plt.subplot(111, projection='polar')
+theta = 0
+for i in range(plotsize):
+	ax.plot(theta, values[i], color='k')
+	ax.annotate(names[i], xy=(theta, values[i]), fontsize=10) # offset under, with very small font
+	theta = theta + 3
+
+ax.grid(True)
+plt.show()
 
 print 'Stocks organized by closest to mean:'
 for i in range(len(tickers)):

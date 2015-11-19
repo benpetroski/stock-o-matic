@@ -31,8 +31,12 @@ for file in jsonFiles:
     stockname = ntpath.basename(file)
     stockname = stockname.split('.')[0] # get rid of the .dat ending
     data = datafile.read()
-    mydict = eval(data) # eval the data (string type) to allow conversion to a python dictionary
+    try:
+    	mydict = eval(data) # eval the data (string type) to allow conversion to a python dictionary
+    except SyntaxError:
+    	print "EOF crap... no clue... for stock..." + stockname
     mydict['date'] = today # fix for the issue before!
+    mydict['name'] = stockname # fix for the issue before!
     if 'Oper. Margin' in mydict.keys():
     	mydict['Oper Margin'] = mydict.pop('Oper. Margin')
     db[today].insert(mydict) # insert dict as a document in the mongoDB collection for today - pymongo handles the conversion to json by itself

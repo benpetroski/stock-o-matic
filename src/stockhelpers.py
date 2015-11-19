@@ -36,19 +36,19 @@ def analyze_by_style(df, style):
 	# for high risk high reward style of investing
 	if style == "highrisk":
 		print "Highrisk style:"
-		print df.sort(['Volatility', 'Beta'], ascending=[True, True])[:20] # most recent dates at top (yes this is hardcoded i couldn't get eval to friggin work)
+		print df.sort(['Volatility', 'Beta', 'stockname'], ascending=[True, True, True])[:20] # most recent dates at top (yes this is hardcoded i couldn't get eval to friggin work)
 		print "\n\n\n"
 
 	# for a moderately style of investing
 	if style == "moderate":
 		print "Moderate style:"
-		print df.sort(['Perf Week', 'ROA', 'ROI', 'Volatility'], ascending=[True, False, False, True])[:20] # most recent dates at top
+		print df.sort(['Perf Week', 'ROA', 'ROI', 'Volatility', 'stockname'], ascending=[True, True, True, False, True])[:20] # most recent dates at top
 		print "\n\n\n"
 
 	# for very stable style of investing
 	if style == "stable":
 		print "Stable style:"
-		print df.sort(['Volatility', 'Beta'], ascending=[False, False])[:20] # most recent dates at top
+		print df.sort(['Volatility', 'Beta', 'stockname'], ascending=[False, False, True])[:20] # most recent dates at top
 		print "\n\n\n"
 
 
@@ -57,8 +57,6 @@ def analyze_by_ab(df):
 	# this is an A/B test... i use the metric "Change" as my A/B: the stocks that changed positive, and those that changed negative
 
 	print "Running A/B analysis... this takes a while"
-
-	df.fillna(0) # fill NaN's with 0
 
 	for i in range(len(df['Change'])):
 		try:
