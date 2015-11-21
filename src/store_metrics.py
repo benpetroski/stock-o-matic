@@ -36,7 +36,7 @@ for file in jsonFiles:
     except SyntaxError:
     	print "EOF crap... no clue... for stock..." + stockname
     mydict['date'] = today # fix for the issue before!
-    mydict['name'] = stockname # fix for the issue before!
+    mydict['stockname'] = stockname # fix for the issue before!
     if 'Oper. Margin' in mydict.keys():
     	mydict['Oper Margin'] = mydict.pop('Oper. Margin')
     db[today].insert(mydict) # insert dict as a document in the mongoDB collection for today - pymongo handles the conversion to json by itself

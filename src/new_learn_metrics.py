@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 # our own module for connecting to the database
 import dbinterface as dbi
@@ -29,20 +31,47 @@ metricNames.extend(["date", "stockname"])
 metricArrays = stkh.get_metric_as_array(allData, metricNames)
 
 df = pd.DataFrame.from_dict(metricArrays)
+
+# clean up stuff - all this should be done far upstream
 df.fillna(0) # fill NaN's with 0
+df = df[df.stockname.notnull()] # remove any math NaN's
+df = df[df.stockname != 'NaN'] # remove any personally placed NaN's
+df = df[df.date.notnull()] # remove any math NaN's
+df = df[df.date != 'NaN'] # remove any personally placed NaN's
+
+# df = df[df.ROI != '-'] # remove any personally placed NaN's
+# df = df[df.ROA != '-'] # remove any personally placed NaN's
+# df = df[df['Perf Half Y'] != '-'] # remove any personally placed NaN's
+# df = df[df['Change'] != '-'] # remove any personally placed NaN's
+# df = df[df['Change'] != 'International, Inc.'] # remove any personally placed NaN's
+# df.ROI.replace('%','',regex=True).astype('float')/100
+# df.ROA.replace('%','',regex=True).astype('float')/100
+# df['Perf Half Y'].replace('%','',regex=True).astype('float')/100
+# df.Change.replace('%','',regex=True).astype('float')/100
 
 '''data frames are excellent - and super fast! its essentially a machine version of 
 an excel spreadsheet for example we can sort by any of the keys we want:'''
 
 stkh.analyze_by_style(df, "highrisk")
-
 stkh.analyze_by_style(df, "moderate")
-
 stkh.analyze_by_style(df, "stable")
+stkh.analyze_by_ab(df) # this one is still fishy due to annoying data cleaning issues
 
-#stkh.analyze_by_ab(df) # this one is still under construction due to annoying data cleaning issues
+x = range(len(df))
+y1 = df['ROI']
+y2 = df['Perf Half Y']
+y3 = df['ROA']
+n = df['stockname']
 
-'''again, this stuff is hardcoded but we can abstract and revise to predifined parameters like we have with the rest of the code!!!!
-i picture certain groups of metrics with the same analysis depending on what your investing style is or what kind of stock you are looking
-to invest it... should be great'''
+plt.figure(1)
+ax = plt.subplot(111)
+ax.plot(x, y1, 'ko', x, y2, 'b*', x, y3, 'r^')
+ax.annotate(n, xy=(x, y1), fontsize=10) # offset under, with very small font with ticker name
+ax.annotate(n, xy=(x, y2), fontsize=10) # offset under, with very small font with ticker name
+ax.annotate(n, xy=(x, y3), fontsize=10) # offset under, with very small font with ticker name
+plt.legend(['ROI','Perf Half Y','ROA'])
+
+ax.grid(True)
+plt.show()
+
 

@@ -36,19 +36,19 @@ def analyze_by_style(df, style):
 	# for high risk high reward style of investing
 	if style == "highrisk":
 		print "Highrisk style:"
-		print df.sort(['Volatility', 'Beta', 'stockname'], ascending=[True, True, True])[:20] # most recent dates at top (yes this is hardcoded i couldn't get eval to friggin work)
+		print df.sort(['Volatility', 'Beta', 'Volume'], ascending=[True, True, True])[:20] # most recent dates at top (yes this is hardcoded i couldn't get eval to friggin work)
 		print "\n\n\n"
 
 	# for a moderately style of investing
 	if style == "moderate":
 		print "Moderate style:"
-		print df.sort(['Perf Week', 'ROA', 'ROI', 'Volatility', 'stockname'], ascending=[True, True, True, False, True])[:20] # most recent dates at top
+		print df.sort(['Perf Week', 'ROA', 'ROI', 'Volatility', 'Volume'], ascending=[True, True, True, False, True])[:20] # most recent dates at top
 		print "\n\n\n"
 
 	# for very stable style of investing
 	if style == "stable":
 		print "Stable style:"
-		print df.sort(['Volatility', 'Beta', 'stockname'], ascending=[False, False, True])[:20] # most recent dates at top
+		print df.sort(['Volatility', 'Beta', 'Volume'], ascending=[False, False, True])[:20] # most recent dates at top
 		print "\n\n\n"
 
 
@@ -58,11 +58,15 @@ def analyze_by_ab(df):
 
 	print "Running A/B analysis... this takes a while"
 
-	for i in range(len(df['Change'])):
-		try:
-			df['Change'][i] = float(df['Change'][i].strip('%'))  # parsed percentages
-		except ValueError:
-			df['Change'][i] = 0
+	for i in range(len(df)):
+		
+		if type(df['Change'].iloc[i]) != float: # first make sure it is not a float already
+			try: # now convert percentages to floats
+				df['Change'].iloc[i] = float(df['Change'].iloc[i].strip('%'))  # parsed percentages
+			except ValueError:
+				df['Change'].iloc[i] = 0
+			except AttributeError:
+				continue
 
 	posStocks = df[df['Change'] > 0]
 	negStocks = df[df['Change'] < 0]
