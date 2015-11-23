@@ -11,5 +11,5 @@ python get_finviz_data.py;
 # Step 3: Get the mean metrics
 python learn_metrics.py;
 
-# Step 4: Back up those metrics to a delicous mongoDB database!
+# Step 4: Back up those metrics to a delicious mongoDB database!
 python store_metrics.py; 

@@ -2,6 +2,7 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 
 # our own module for connecting to the database
@@ -11,7 +12,8 @@ import dbinterface as dbi
 import stockhelpers as stkh
 
 # establish connection
-path_to_rsa = "/Users/chris/" # YOU NEED TO CHANGE THIS TO WHAT IT IS ON YOUR COMPUTER!!!!!!
+# note: if id_rsa is not found, this might need to be changed.
+path_to_rsa = os.path.expanduser("~/")
 dbi.connect(path_to_rsa)
 
 # thanks to ben's work, this array can be as long or as short as you want it

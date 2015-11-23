@@ -7,11 +7,13 @@ import glob
 import datetime
 import ntpath
 import dbinterface as dbi
+import os
 
 # this script loops through all the .dat files for every stock and puts them in the tasty raspberry pi mongoDB database
 
 # before sending data to the mongodb, we need to connect to it!
-path_to_rsa = "/Users/chris/" # YOU NEED TO CHANGE THIS TO WHAT IT IS ON YOUR COMPUTER!!!!!!
+# note: if id_rsa is not found, this might need to be changed.
+path_to_rsa = os.path.expanduser("~/")
 dbi.connect(path_to_rsa)
 
 # Our python client to the localhost mongodb
