@@ -2,6 +2,9 @@ import requests
 from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from dateutil.tz import tzlocal
+import numpy as np
+import base64
+
 
 class FinvizTicker:
 
@@ -24,7 +27,6 @@ class FinvizTicker:
         # Parse the html and create the metrics dictionary
         self.metrics = self._get_metrics()
 
-
     def _get_metrics(self):
         # Extract the main table with ticker data and create a list of the rows in the table
         table = self._data.find('table', {'class': 'snapshot-table2'})
@@ -41,9 +43,9 @@ class FinvizTicker:
             if len(cols) % 2 == 0:
 
                 # Extract out the unicode and convert to a raw string
-                data = [ col.text for col in cols ]
-                keys = [ str(key) for key in data[0::2] ]
-                values = [ str(value) for value in data[1::2] ]
+                data = [col.text for col in cols]
+                keys = [clean_varname(key) for key in data[0::2]]
+                values = [clean_value(value) for value in data[1::2]]
 
                 # Add the row in to the metric database
                 metrics.update(zip(keys, values))
@@ -56,5 +58,51 @@ class FinvizTicker:
         return '%s: $%s\nretrieved on %s' % (self.symbol, self.metrics['Price'], ticker.time_stamp.strftime('%Y-%m-%d %H:%M:%S %Z'))
 
 
-ticker = FinvizTicker('AA')
-print ticker
+def clean_value(value):
+
+    # First convert it to a string
+    value = str(value)
+
+    try:
+        return float(value)
+    except ValueError:
+        pass
+
+    # Check if it is a number with a string
+    if value[-1:] == 'B':
+        return float(value[0:-1])*1e9
+    elif value[-1:] == 'M':
+        return float(value[0:-1])*1e6
+
+    # Now check if it is a percentage
+    if value[-1:] == '%':
+        return float(value[0:-1])/100
+
+    # Check for boolean responses
+    if value == 'Yes':
+        return True
+    if value == 'No':
+        return False
+
+    # Check for blank entries
+    if value == '-':
+        return np.nan
+
+    return value
+
+print clean_value('BBdf')
+
+def clean_varname(varname):
+
+    varname = str(varname)
+    varname.replace('.', '\p')
+    varname.replace('$', '\d')
+    return varname
+
+
+def revert_varname(varname):
+
+    varname.replace('\p', '.')
+    varname.replace('\d', '$')
+
+    return varname
