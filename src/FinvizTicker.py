@@ -17,7 +17,7 @@ class FinvizTicker:
 
         # Download the ticker, and parse using beautiful soup
         html = requests.get(self.url)
-        self._data = BeautifulSoup(html.content)
+        self._data = BeautifulSoup(html.content.replace('<br>', ''))
         self.time_stamp = datetime.now(tzlocal())
 
         # Check if the page exists
@@ -59,24 +59,38 @@ class FinvizTicker:
 
 
 def clean_value(value):
+    '''
+    Takes Finviz table string and parses it to determine data type. Function prepares data for MongoDB interface.
+    '''
 
-    # First convert it to a string
+    # Convert from unicode to an ASCII string
     value = str(value)
 
+    # Remove any extraneous commas in the numbers
+    value = value.replace(',', '')
+
+    # Try converting to a float and move on if it does not work
     try:
         return float(value)
     except ValueError:
         pass
 
-    # Check if it is a number with a string
+    # Check if it is a number with a order of magnitude character appended to the end (million, billion, etc.)
     if value[-1:] == 'B':
         return float(value[0:-1])*1e9
     elif value[-1:] == 'M':
         return float(value[0:-1])*1e6
+    elif value[-1:] == 'K':
+        return float(value[0:-1])*1e3
 
-    # Now check if it is a percentage
+    # Now check if the quantity is a percentage and handle the list case
     if value[-1:] == '%':
-        return float(value[0:-1])/100
+        val = [float(x)/100 for x in value.replace('%', '').split(' ')]
+
+        if len(val) == 1:
+            return val[0]
+        else:
+            return val
 
     # Check for boolean responses
     if value == 'Yes':
@@ -88,9 +102,13 @@ def clean_value(value):
     if value == '-':
         return np.nan
 
+    # Check for range, ex: (23 - 34)
+    if '-' in value:
+        return [float(x) for x in value.replace('-', '').split()]
+
+    # If one of the previous cases does not execute, just pass the string form
     return value
 
-print clean_value('BBdf')
 
 def clean_varname(varname):
 
