@@ -6,7 +6,7 @@ BeautifulSoup==3.2.1
 bonjour-py==0.3
 Bottleneck==1.0.0
 certifi==2015.11.20
-ecdsa==0.13
+ecdsa==0.13.3
 macholib==1.5.1
 matplotlib==1.3.1
 modulegraph==0.10.4
