@@ -19,9 +19,3 @@ Old top 20, from finviz scrape of April 2nd:
 17   IEO  1157.866522
 18   RPG  1258.058256
 19   MVV  1260.646904
-
-New top 20, finviz scraped from September 19th:
-
-
-
-

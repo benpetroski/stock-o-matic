@@ -1,25 +1,27 @@
+#!/usr/bin/python
+
 import requests
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from datetime import datetime
-from dateutil.tz import tzlocal
+from tzlocal import get_localzone
 
 class FinvizTicker:
 
-    def __init__(self, symbol):
+    def __init__(self, ticker):
         # Convert the string to uppercase
-        self.symbol = symbol.upper()
+        self.ticker = ticker.upper()
 
         # Construct the url from the ticker
-        self.url = 'http://finviz.com/quote.ashx?t=' + self.symbol
+        self.url = 'http://finviz.com/quote.ashx?t=' + self.ticker
 
         # Download the ticker, and parse using beautiful soup
         html = requests.get(self.url)
-        self._data = BeautifulSoup(html.content)
-        self.time_stamp = datetime.now(tzlocal())
+        self._data = BeautifulSoup(html.content, features="html.parser")
+        self.time_stamp = datetime.now(get_localzone())
 
-        # Check if the page exists
-        if 'We cover only stocks and ETFs listed on NYSE, NASDAQ, and AMEX. International and OTC/PK are not available.' in html.content:
-            raise ImportError('Stock symbol \'' + self.symbol + '\' does not exist in the Finviz database.')
+        # Check if the page exists - note b for bytes like object
+        if b'We cover only stocks and ETFs listed on NYSE, NASDAQ, and AMEX. International and OTC/PK are not available.' in html.content:
+            raise ImportError('Stock ticker \'' + self.ticker + '\' does not exist in the Finviz database.')
 
         # Parse the html and create the metrics dictionary
         self.metrics = self._get_metrics()
@@ -51,10 +53,10 @@ class FinvizTicker:
                 raise ImportError('Dude, the finviz table doesn''t have an even number of columns!')
 
         return metrics
+    
+    # metrics getter
+    def getMetrics(self):
+        return self.metrics
 
     def __str__(self):
-        return '%s: $%s\nretrieved on %s' % (self.symbol, self.metrics['Price'], ticker.time_stamp.strftime('%Y-%m-%d %H:%M:%S %Z'))
-
-
-ticker = FinvizTicker('AA')
-print ticker
+        return '%s: $%s\nretrieved on %s' % (self.ticker, self.metrics['Price'], self.time_stamp.strftime('%Y-%m-%d %H:%M:%S %Z'))
