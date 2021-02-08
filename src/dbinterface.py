@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 # imports
-import os
 import time
-import pymongo
 from pymongo import Connection
 import datetime
 from sshtunnel import SSHTunnelForwarder
