@@ -19,7 +19,7 @@ def generate_url(symbols):
     # Construct the url with a url encoded version of the query string
     url = 'https://query.yahooapis.com/v1/public/yql?'
     params = {'env': 'store://datatables.org/alltableswithkeys', 'diagnostics': 'true', 'q': query_string}
-    return url + urllib.urlencode(params)
+    return url + urllib.parse.urlencode(params)
 
 
 # Read in the S&P500 csv file and create a list of all tickers in the S&P500

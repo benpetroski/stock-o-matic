@@ -28,17 +28,17 @@ top50Dict['metrictype'] = 'top50'
 top50Dict['version'] = 'v1'
 
 # Read in ticker symbol list as created by get_finviz_ticker_symbols.py
-with open('ticker_symbols.dat') as f:
+with open('data/ticker_symbols.dat') as f:
     tickers = f.readlines()
 
 # Read in metric names
-with open('metrics.dat') as f:
+with open('data/metrics.dat') as f:
     metricNames = f.readlines()
 
 # Create metrics python dict
 metrics = {}
 for i in range(len(tickers)):
-	fname = 'data/' + tickers[i].rstrip() + '.dat'
+	fname = 'data/tickers/' + tickers[i].rstrip() + '.dat'
 	if(os.path.isfile(fname)):
 		metrics[tickers[i].rstrip()] = eval(open(fname, 'r').read())
 
@@ -92,10 +92,10 @@ for i in range(len(metricNames)):
 meanMetrics = []
 meanMetrics = np.divide(metricSums,sumCounts) # Element-wise division: Bad-ass! using pandas and numpy in the same script! (am i real data scientist yet?)
 meanMetrics = meanMetrics.tolist()
-# Print mean metrics to terminal
-print 'Mean metrics are:'
+# Print(mean metrics to terminal)
+print('Mean metrics are:')
 for i in range(len(metricNames)):
-	print metricNames[i].strip() + '  :  ' + str(meanMetrics[i])
+	print(metricNames[i].strip() + '  :  ' + str(meanMetrics[i]))
 	meanMetricDict[metricNames[i].strip()] = str(meanMetrics[i])
 
 # Now a very simple calculation of squared distance to the mean
@@ -148,15 +148,15 @@ for i in range(plotsize):
 ax.grid(True)
 plt.show()
 
-print 'Stocks organized by closest to mean:'
+print('Stocks organized by closest to mean:')
 for i in range(len(tickers)):
-	print tickers[i].strip() + '  :  ' + str(squaredDistance[tickers[i].strip()])
+	print(tickers[i].strip() + '  :  ' + str(squaredDistance[tickers[i].strip()]))
 	squaredDistanceDict[tickers[i].strip()] = str(squaredDistance[tickers[i].strip()])
 
-print 'Top 50 stocks closest to the mean of the market:'
+print('Top 50 stocks closest to the mean of the market:')
 
 for i in range(50):
-	print sortedFrame.iloc[i][0] + " : " + str(sortedFrame.iloc[i][1])
+	print(sortedFrame.iloc[i][0] + " : " + str(sortedFrame.iloc[i][1]))
 	top50Dict[sortedFrame.iloc[i][0]] = sortedFrame.iloc[i][1]
 
 # write the python dicts to the files

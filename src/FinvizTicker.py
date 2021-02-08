@@ -3,7 +3,9 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-from tzlocal import get_localzone
+from pytz import timezone
+
+eastern = timezone('US/Eastern')
 
 class FinvizTicker:
 
@@ -15,12 +17,13 @@ class FinvizTicker:
         self.url = 'http://finviz.com/quote.ashx?t=' + self.ticker
 
         # Download the ticker, and parse using beautiful soup
-        html = requests.get(self.url)
-        self._data = BeautifulSoup(html.content, features="html.parser")
-        self.time_stamp = datetime.now(get_localzone())
+        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"}
+        response = requests.get(self.url, headers=headers)
+        self._data = BeautifulSoup(response.content, 'html.parser')
+        self.time_stamp = datetime.now(eastern)
 
         # Check if the page exists - note b for bytes like object
-        if b'We cover only stocks and ETFs listed on NYSE, NASDAQ, and AMEX. International and OTC/PK are not available.' in html.content:
+        if b'We cover only stocks and ETFs listed on NYSE, NASDAQ, and AMEX. International and OTC/PK are not available.' in response.content:
             raise ImportError('Stock ticker \'' + self.ticker + '\' does not exist in the Finviz database.')
 
         # Parse the html and create the metrics dictionary

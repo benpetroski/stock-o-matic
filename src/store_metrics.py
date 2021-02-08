@@ -1,6 +1,5 @@
 import subprocess
 import time
-import pymongo
 from pymongo import Connection
 import json
 import glob
@@ -26,7 +25,7 @@ db = connection['stockdata']
 
 directory = '/Users/chris/github/stock-o-matic/src/data/*.dat'
 
-print "Beginning backup to raspberry pi..."
+print("Beginning backup to raspberry pi...")
 jsonFiles = glob.glob(directory)
 for file in jsonFiles:
     datafile = open(file, 'r')
@@ -36,11 +35,11 @@ for file in jsonFiles:
     try:
     	mydict = eval(data) # eval the data (string type) to allow conversion to a python dictionary
     except SyntaxError:
-    	print "EOF crap... no clue... for stock..." + stockname
+    	print("EOF crap... no clue... for stock..." + stockname)
     mydict['date'] = today # fix for the issue before!
     mydict['stockname'] = stockname # fix for the issue before!
     if 'Oper. Margin' in mydict.keys():
     	mydict['Oper Margin'] = mydict.pop('Oper. Margin')
     db[today].insert(mydict) # insert dict as a document in the mongoDB collection for today - pymongo handles the conversion to json by itself
 
-print "Done."
+print("Done.")

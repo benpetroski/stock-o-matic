@@ -14,7 +14,7 @@ __dbport__ = 6789
 
 def connect(path_to_rsa):
 
-	print "Attempting to connect with the mongodb server on chris's rapsberry pi...\n"
+	print("Attempting to connect with the mongodb server on chris's rapsberry pi...\n")
 	server = SSHTunnelForwarder(('chrisfrew.in', 8022),\
 		ssh_username="pi",\
 		ssh_private_key=path_to_rsa + ".ssh/id_rsa",\
@@ -22,14 +22,14 @@ def connect(path_to_rsa):
 		remote_bind_address=('127.0.0.1', 27017))
 	server.start()
 	time.sleep(3)
-	print "\nConnection successfully established.\n"
+	print("\nConnection successfully established.\n")
 
 
 # this is the current bottleneck of our code - querying the mongodb to get the responses for each stock of interest
 # not sure if sshtunnel forward is thread safe but we could potentially open multiple ports to complete the read
 def get_stock_data(stocknames):
 
-	print "Pulling stock data; this can take a while...\n"
+	print("Pulling stock data; this can take a while...\n")
 	# generate n number of days back (names of our collections in the mongodb
 	numdays = 60 # go back two months
 	base = datetime.datetime.today()
@@ -57,19 +57,19 @@ def get_stock_data(stocknames):
 				document['date'] = stringdates[i] # NOTE: this is currently a patch for what should be done when the data is read!
 			 	documents.append(document)
 
-		print "Done with pulling stock " + stock + " (" + str(count) + " of " + str(len(stocknames)) + ")"
+		print("Done with pulling stock " + stock + " (" + str(count) + " of " + str(len(stocknames)) + ")")
 		count = count + 1
 
 	if len(documents) == 0:
-		print "Warning: no documents were found in for the given stock names!"
+		print("Warning: no documents were found in for the given stock names!")
 
-	print "Done.\n"
+	print("Done.\n")
 
 	return documents
 
 def get_all_stock_data():
 
-	print "Pulling all stock data; this can take a few seconds...\n"
+	print("Pulling all stock data; this can take a few seconds...\n")
 	# generate n number of days back (names of our collections in the mongodb
 	numdays = 60 # go back two months
 	base = datetime.datetime.today()
@@ -96,9 +96,9 @@ def get_all_stock_data():
 		 	documents.append(document)
 
 	if len(documents) == 0:
-		print "Warning: no documents were found!"
+		print("Warning: no documents were found!")
 
-	print "Done.\n"
+	print("Done.\n")
 
 	return documents
 
