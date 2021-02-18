@@ -2,13 +2,14 @@
 import requests
 import time
 import json
+import os
 from FinvizTicker import FinvizTicker
 from multiprocessing import Pool
 
 failedTickers = []
 
 def slack_message(message):
-    requests.post('https://hooks.slack.com/services/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', data={'text': message})
+    requests.post(os.environ['WHEEL_SCREENER_SLACK_WEBHOOK_URL'], json={'text': message})
 
 # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
 def call_dotnet_option_calculator_api(tickerName):
@@ -34,6 +35,7 @@ if __name__ == '__main__':
     # Processes need to be throttled to prevent rate limiting by TDAmeritrade
     # pool = Pool(processes=5)
     # pool.map(call_dotnet_option_calculator_api, tickers)
+    slack_message("Starting today's scrape! 🚀")
     for i in range(0, len(tickers)):
         print(str(i+1) + ' of ' + str(len(tickers)) + '...')
         with open('data/tickers/' + tickers[i] + '.json') as f:
