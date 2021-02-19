@@ -6,20 +6,22 @@ import os
 from FinvizTicker import FinvizTicker
 from multiprocessing import Pool
 
+totalStoredCount = 0
 failedTickers = []
 
 def slack_message(message):
     requests.post(os.environ['WHEEL_SCREENER_SLACK_WEBHOOK_URL'], json={'text': message})
 
-# TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
 def call_dotnet_option_calculator_api(tickerName):
     response = requests.post('http://localhost:5000/Wheel/' + tickerName)
     print(response.text)
     if response.status_code == 200:
         print(tickerName + ' done!')
+        return int(response.text)
     else:
         print(tickerName + ' failed :(')
         failedTickers.append(tickerName)
+        return 0
 
 if __name__ == '__main__':
 
@@ -41,10 +43,13 @@ if __name__ == '__main__':
         with open('data/tickers/' + tickers[i] + '.json') as f:
             metrics = json.load(f)
             if metrics['Optionable']:
-                call_dotnet_option_calculator_api(tickers[i])
+                count = call_dotnet_option_calculator_api(tickers[i])
+                totalStoredCount += count
+                # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
                 time.sleep(0.6)
 
     slack_message('Options retrieval complete!')
-    slack_message('Failed tickers ' + str(len(failedTickers)) + ':')
+    slack_message('Failed tickers (' + str(len(failedTickers)) + '):')
     separator = ', '
     slack_message(separator.join(failedTickers))
+    slack_message('Total contracts stored: ' + totalStoredCount)
