@@ -46,4 +46,5 @@ if __name__ == '__main__':
 
     slack_message('Options retrieval complete!')
     slack_message('Failed tickers ' + str(len(failedTickers)) + ':')
-    slack_message(failedTickers)
+    separator = ', '
+    slack_message(separator.join(failedTickers))
