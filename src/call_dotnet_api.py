@@ -6,9 +6,6 @@ import os
 from FinvizTicker import FinvizTicker
 from multiprocessing import Pool
 
-totalStoredCount = 0
-failedTickers = []
-
 def slack_message(message):
     requests.post(os.environ['WHEEL_SCREENER_SLACK_WEBHOOK_URL'], json={'text': message})
 
@@ -17,11 +14,25 @@ def call_dotnet_option_calculator_api(tickerName):
     print(response.text)
     if response.status_code == 200:
         print(tickerName + ' done!')
-        return int(response.text)
+        return int(response.text), ''
     else:
         print(tickerName + ' failed :(')
-        failedTickers.append(tickerName)
-        return 0
+        return -1, tickerName
+
+def run_for_tickers(tickers):
+    failedTickers = []
+    totalStoredCount = 0
+    for i in range(0, len(tickers)):
+        print(str(i+1) + ' of ' + str(len(tickers)) + '...')
+        with open('data/tickers/' + tickers[i] + '.json') as f:
+            metrics = json.load(f)
+            if metrics['Optionable']:
+                count, tickerName = call_dotnet_option_calculator_api(tickers[i])
+                totalStoredCount += count
+                failedTickers.append(tickerName)
+                # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
+                time.sleep(0.6)
+    return totalStoredCount, failedTickers
 
 if __name__ == '__main__':
 
@@ -33,23 +44,25 @@ if __name__ == '__main__':
         for i, ticker in enumerate(tickers):
             tickers[i] = ticker.replace('\n', '')
 
-    # Start processes, as they empty, a new case is fed in
-    # Processes need to be throttled to prevent rate limiting by TDAmeritrade
-    # pool = Pool(processes=5)
-    # pool.map(call_dotnet_option_calculator_api, tickers)
-    slack_message("Starting today's scrape! 🚀")
-    for i in range(0, len(tickers)):
-        print(str(i+1) + ' of ' + str(len(tickers)) + '...')
-        with open('data/tickers/' + tickers[i] + '.json') as f:
-            metrics = json.load(f)
-            if metrics['Optionable']:
-                count = call_dotnet_option_calculator_api(tickers[i])
-                totalStoredCount += count
-                # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
-                time.sleep(0.6)
+        # Start processes, as they empty, a new case is fed in
+        # Processes need to be throttled to prevent rate limiting by TDAmeritrade
+        # pool = Pool(processes=5)
+        # pool.map(call_dotnet_option_calculator_api, tickers)
 
-    slack_message('Options retrieval complete!')
-    slack_message('Failed tickers (' + str(len(failedTickers)) + '):')
-    separator = ', '
-    slack_message(separator.join(failedTickers))
-    slack_message('Total contracts stored: ' + totalStoredCount)
+        slack_message("Starting today's scrape! 🚀")
+        totalStoredCount, failedTickers = run_for_tickers(tickers)
+        slack_message('Options retrieval complete!')
+        slack_message('Failed tickers (' + str(len(failedTickers)) + '):')
+        separator = ', '
+        slack_message(separator.join(failedTickers))
+        slack_message('Total contracts stored: ' + str(totalStoredCount))
+
+        # Try on the failed tickers
+        slack_message('Retrying failed tickers...')
+        totalStoredCount, failedTickers =  run_for_tickers(failedTickers)
+        slack_message('Failed tickers after retry (' + str(len(failedTickers)) + '):')
+        separator = ', '
+        slack_message(separator.join(failedTickers))
+        slack_message('Total contracts stored: ' + str(totalStoredCount))
+    
+
