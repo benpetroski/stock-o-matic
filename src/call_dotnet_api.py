@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import requests
 import time
 import json
@@ -6,17 +7,26 @@ import os
 from FinvizTicker import FinvizTicker
 from multiprocessing import Pool
 
+if len(sys.argv) > 1:
+    environment = sys.argv[1]
+
+def write_message(message):
+    print(message)
+    # log to logz if in production
+    if environment == "PRODUCTION":
+        requests.post('http://localhost:5000/Log/Info', json={'message': message})
+
 def slack_message(message):
     requests.post(os.environ['WHEEL_SCREENER_SLACK_WEBHOOK_URL'], json={'text': message})
 
 def call_dotnet_option_calculator_api(tickerName):
     response = requests.post('http://localhost:5000/Wheel/' + tickerName)
-    print(response.text)
+    write_message(response.text)
     if response.status_code == 200:
-        print(tickerName + ' done!')
+        write_message(tickerName + ' done!')
         return int(response.text), ''
     else:
-        print(tickerName + ' failed :(')
+        write_message(tickerName + ' failed :(')
         return -1, tickerName
 
 def call_dotnet_completion_endpoint():
@@ -27,7 +37,7 @@ def run_for_tickers(tickers):
     failedTickers = []
     totalStoredCount = 0
     for i in range(0, len(tickers)):
-        print(str(i+1) + ' of ' + str(len(tickers)) + '...')
+        write_message(str(i+1) + ' of ' + str(len(tickers)) + '...')
         with open('data/tickers/' + tickers[i] + '.json') as f:
             metrics = json.load(f)
             if metrics['Optionable']:
@@ -77,8 +87,4 @@ if __name__ == '__main__':
             slack_message("Success! Today's dataset is ready to rip!")
         else:
             slack_message("Uh oh! Looks like something went wrong with the completion endpoint!")
-
-
-
-    
 
