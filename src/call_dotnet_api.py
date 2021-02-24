@@ -29,7 +29,9 @@ def run_for_tickers(tickers):
             if metrics['Optionable']:
                 count, tickerName = call_dotnet_option_calculator_api(tickers[i])
                 totalStoredCount += count
-                failedTickers.append(tickerName)
+                # if ticker name is not an emptry string, there was some sort of error with retrieval
+                if tickerName != '':
+                    failedTickers.append(tickerName)
                 # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
                 time.sleep(0.6)
     return totalStoredCount, failedTickers
