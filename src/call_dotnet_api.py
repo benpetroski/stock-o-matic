@@ -7,12 +7,14 @@ import os
 from FinvizTicker import FinvizTicker
 from multiprocessing import Pool
 
+# This script runs every day at 5AM to get all contracts in the market
+
 if len(sys.argv) > 1:
     environment = sys.argv[1]
 
 def write_message(message):
     print(message)
-    # log to logz if in production
+    # log to logz API endpoint if in production
     if environment == "PRODUCTION":
         requests.post('http://localhost:5000/Log/Info', json={'message': message})
 
@@ -31,7 +33,11 @@ def call_dotnet_option_calculator_api(tickerName):
 
 def call_dotnet_completion_endpoint():
     response = requests.post('http://localhost:5000/Wheel/CompleteDataset')
-    return response.status_code == 200
+    if response.status_code == 200:
+        data = response.json()
+        return data.count
+    else:
+        return 0
 
 def run_for_tickers(tickers):
     failedTickers = []
@@ -82,10 +88,7 @@ if __name__ == '__main__':
         slack_message(separator.join(failedTickers))
         slack_message('Total contracts stored during retry: ' + str(totalStoredCount))
 
+        # We've tried as much we can, now run the completion endpoint
         slack_message('Calling completion endpoint...')
-        success = call_dotnet_completion_endpoint()
-        if success:
-            slack_message("Success! Today's dataset is ready to rip!")
-        else:
-            slack_message("Uh oh! Looks like something went wrong with the completion endpoint!")
-
+        processed_wheels = call_dotnet_completion_endpoint()
+        slack_message("The completion endpoint reported processing " + str(processed_wheels) + " wheels!")
