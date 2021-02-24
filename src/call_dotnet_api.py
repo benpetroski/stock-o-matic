@@ -19,6 +19,10 @@ def call_dotnet_option_calculator_api(tickerName):
         print(tickerName + ' failed :(')
         return -1, tickerName
 
+def call_dotnet_completion_endpoint():
+    response = requests.post('http://localhost:5000/CompleteDataset')
+    return response.status_code == 200
+
 def run_for_tickers(tickers):
     failedTickers = []
     totalStoredCount = 0
@@ -65,6 +69,16 @@ if __name__ == '__main__':
         slack_message('Failed tickers after retry (' + str(len(failedTickers)) + '):')
         separator = ', '
         slack_message(separator.join(failedTickers))
-        slack_message('Total contracts stored: ' + str(totalStoredCount))
+        slack_message('Total contracts stored during retry: ' + str(totalStoredCount))
+
+        slack_message('Calling completion endpoint...')
+        success = call_dotnet_completion_endpoint()
+        if success:
+            slack_message("Success! Today's dataset is ready to rip!")
+        else:
+            slack_message("Uh oh! Looks like something went wrong with the completion endpoint!")
+
+
+
     
 
