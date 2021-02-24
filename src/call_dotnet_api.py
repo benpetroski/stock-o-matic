@@ -27,10 +27,10 @@ def call_dotnet_option_calculator_api(tickerName):
         return int(response.text), ''
     else:
         write_message(tickerName + ' failed :(')
-        return -1, tickerName
+        return 0, tickerName
 
 def call_dotnet_completion_endpoint():
-    response = requests.post('http://localhost:5000/CompleteDataset')
+    response = requests.post('http://localhost:5000/Wheel/CompleteDataset')
     return response.status_code == 200
 
 def run_for_tickers(tickers):
@@ -46,6 +46,7 @@ def run_for_tickers(tickers):
                 # if ticker name is not an emptry string, there was some sort of error with retrieval
                 if tickerName != '':
                     failedTickers.append(tickerName)
+                    
                 # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
                 time.sleep(0.6)
     return totalStoredCount, failedTickers
