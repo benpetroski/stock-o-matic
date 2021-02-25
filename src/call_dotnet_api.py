@@ -31,8 +31,8 @@ def call_dotnet_option_calculator_api(tickerName):
         write_message(tickerName + ' failed :(')
         return 0, tickerName
 
-def call_dotnet_completion_endpoint():
-    response = requests.post('http://localhost:5000/Wheel/CompleteDataset')
+def call_dotnet_normalization_endpoint():
+    response = requests.post('http://localhost:5000/Wheel/NormalizeDataset')
     if response.status_code == 200:
         data = response.json()
         return data.count
@@ -58,37 +58,37 @@ def run_for_tickers(tickers):
     return totalStoredCount, failedTickers
 
 if __name__ == '__main__':
-
+    
     # Read in ticker symbol list created by get_finviz_ticker_symbols.py
     with open('data/ticker_symbols.dat') as f:
         tickers = f.readlines()
 
-        # Clear ticker symbols of new line character
-        for i, ticker in enumerate(tickers):
-            tickers[i] = ticker.replace('\n', '')
+    # Clear ticker symbols of new line character
+    for i, ticker in enumerate(tickers):
+        tickers[i] = ticker.replace('\n', '')
 
-        # Start processes, as they empty, a new case is fed in
-        # Processes need to be throttled to prevent rate limiting by TDAmeritrade
-        # pool = Pool(processes=5)
-        # pool.map(call_dotnet_option_calculator_api, tickers)
+    # Start processes, as they empty, a new case is fed in
+    # Processes need to be throttled to prevent rate limiting by TDAmeritrade
+    # pool = Pool(processes=5)
+    # pool.map(call_dotnet_option_calculator_api, tickers)
 
-        slack_message("Starting today's scrape! 🚀")
-        totalStoredCount, failedTickers = run_for_tickers(tickers)
-        slack_message('Options retrieval complete!')
-        slack_message('Failed tickers (' + str(len(failedTickers)) + '):')
-        separator = ', '
-        slack_message(separator.join(failedTickers))
-        slack_message('Total contracts stored: ' + str(totalStoredCount))
+    slack_message("Starting today's scrape! 🚀")
+    totalStoredCount, failedTickers = run_for_tickers(tickers)
+    slack_message('Options retrieval complete!')
+    slack_message('Failed tickers (' + str(len(failedTickers)) + '):')
+    separator = ', '
+    slack_message(separator.join(failedTickers))
+    slack_message('Total contracts stored: ' + str(totalStoredCount))
 
-        # Try on the failed tickers
-        slack_message('Retrying failed tickers...')
-        totalStoredCount, failedTickers =  run_for_tickers(failedTickers)
-        slack_message('Failed tickers after retry (' + str(len(failedTickers)) + '):')
-        separator = ', '
-        slack_message(separator.join(failedTickers))
-        slack_message('Total contracts stored during retry: ' + str(totalStoredCount))
+    # Try on the failed tickers
+    slack_message('Retrying failed tickers...')
+    totalStoredCount, failedTickers =  run_for_tickers(failedTickers)
+    slack_message('Failed tickers after retry (' + str(len(failedTickers)) + '):')
+    separator = ', '
+    slack_message(separator.join(failedTickers))
+    slack_message('Total contracts stored during retry: ' + str(totalStoredCount))
 
-        # We've tried as much we can, now run the completion endpoint
-        slack_message('Calling completion endpoint...')
-        processed_wheels = call_dotnet_completion_endpoint()
-        slack_message("The completion endpoint reported processing " + str(processed_wheels) + " wheels!")
+    # We've tried as much we can, now run the normalization endpoint
+    slack_message('Calling normalization endpoint...')
+    processed_wheels = call_dotnet_normalization_endpoint()
+    slack_message("The normalization endpoint reported processing " + str(processed_wheels) + " wheels!")
