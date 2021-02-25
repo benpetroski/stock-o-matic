@@ -12,11 +12,14 @@ from multiprocessing import Pool
 if len(sys.argv) > 1:
     environment = sys.argv[1]
 
-def write_message(message):
+def write_message(message, withSlack = False):
+    # always print to standard out
     print(message)
     # log to logz API endpoint if in production
     if environment == "PRODUCTION":
         requests.post('http://localhost:5000/Log/Info', json={'message': message})
+    if withSlack:
+        slack_message(message)
 
 def slack_message(message):
     requests.post(os.environ['WHEEL_SCREENER_SLACK_WEBHOOK_URL'], json={'text': message})
@@ -31,11 +34,19 @@ def call_dotnet_option_calculator_api(tickerName):
         write_message(tickerName + ' failed :(')
         return 0, tickerName
 
-def call_dotnet_normalization_endpoint():
-    response = requests.post('http://localhost:5000/Wheel/NormalizeDataset')
+def post_dotnet_count_type_endpoint(endpoint):
+    response = requests.post(endpoint)
     if response.status_code == 200:
         data = response.json()
-        return data.count
+        return int(data['count'])
+    else:
+        return 0
+
+def get_dotnet_count_type_endpoint(endpoint):
+    response = requests.get(endpoint)
+    if response.status_code == 200:
+        data = response.json()
+        return int(data['count'])
     else:
         return 0
 
@@ -60,8 +71,13 @@ def run_for_tickers(tickers):
 if __name__ == '__main__':
     
     # Read in ticker symbol list created by get_finviz_ticker_symbols.py
-    with open('data/ticker_symbols.dat') as f:
-        tickers = f.readlines()
+    if environment == "PRODUCTION":
+        with open('data/ticker_symbols.dat') as f:
+            tickers = f.readlines()
+    else:
+        # dev tickers - super short list in order to test
+        # tickers = ['AAPL', 'GOOGL', 'GME', 'TLRY', 'AMC', 'TSLA', 'AMD', 'MU']
+        tickers = ['AAPL']
 
     # Clear ticker symbols of new line character
     for i, ticker in enumerate(tickers):
@@ -72,23 +88,26 @@ if __name__ == '__main__':
     # pool = Pool(processes=5)
     # pool.map(call_dotnet_option_calculator_api, tickers)
 
-    slack_message("Starting today's scrape! 🚀")
+    write_message("Starting today's scrape! 🚀", True)
     totalStoredCount, failedTickers = run_for_tickers(tickers)
-    slack_message('Options retrieval complete!')
-    slack_message('Failed tickers (' + str(len(failedTickers)) + '):')
+    write_message('Options retrieval complete!', True)
+    write_message('Failed tickers (' + str(len(failedTickers)) + '):', True)
     separator = ', '
-    slack_message(separator.join(failedTickers))
-    slack_message('Total contracts stored: ' + str(totalStoredCount))
+    write_message(separator.join(failedTickers), True)
+    write_message('Total contracts stored: ' + str(totalStoredCount), True)
 
     # Try on the failed tickers
-    slack_message('Retrying failed tickers...')
-    totalStoredCount, failedTickers =  run_for_tickers(failedTickers)
-    slack_message('Failed tickers after retry (' + str(len(failedTickers)) + '):')
-    separator = ', '
-    slack_message(separator.join(failedTickers))
-    slack_message('Total contracts stored during retry: ' + str(totalStoredCount))
+    if len(failedTickers) > 0:
+        write_message('Retrying failed tickers...', True)
+        totalStoredCount, failedTickers =  run_for_tickers(failedTickers)
+        write_message('Failed tickers after retry (' + str(len(failedTickers)) + '):', True)
+        separator = ', '
+        write_message(separator.join(failedTickers), True)
+        write_message('Total contracts stored during retry: ' + str(totalStoredCount), True)
 
     # We've tried as much we can, now run the normalization endpoint
-    slack_message('Calling normalization endpoint...')
-    processed_wheels = call_dotnet_normalization_endpoint()
-    slack_message("The normalization endpoint reported processing " + str(processed_wheels) + " wheels!")
+    write_message('Calling normalization endpoint...', True)
+    processed_wheels = post_dotnet_count_type_endpoint('http://localhost:5000/Wheel/NormalizeDataset')
+    write_message("The normalization endpoint reported processing " + str(processed_wheels) + " wheels!", True)
+    total_wheels = get_dotnet_count_type_endpoint('http://localhost:5000/Wheel/Count')
+    write_message("Cron complete. Total wheels in the database is: " + str(total_wheels), True)
