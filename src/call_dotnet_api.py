@@ -50,6 +50,14 @@ def get_dotnet_count_type_endpoint(endpoint):
     else:
         return 0
 
+def get_dotnet_complete_endpoint(endpoint):
+    response = requests.get(endpoint)
+    if response.status_code == 200:
+        data = response.json()
+        return data['lastDatasetComplete']
+    else:
+        return 0
+
 def run_for_tickers(tickers):
     failedTickers = []
     totalStoredCount = 0
@@ -75,9 +83,9 @@ if __name__ == '__main__':
         with open('data/ticker_symbols.dat') as f:
             tickers = f.readlines()
     else:
-        # dev tickers - super short list in order to test
-        # tickers = ['AAPL', 'GOOGL', 'GME', 'TLRY', 'AMC', 'TSLA', 'AMD', 'MU']
-        tickers = ['AAPL']
+        # dev tickers - shorter list (S&P500) in order to test rapidly
+        with open('data/ticker_symbols_s_and_p.dat') as f:
+            tickers = f.readlines()
 
     # Clear ticker symbols of new line character
     for i, ticker in enumerate(tickers):
@@ -111,3 +119,5 @@ if __name__ == '__main__':
     write_message("The normalization endpoint reported processing " + str(processed_wheels) + " wheels!", True)
     total_wheels = get_dotnet_count_type_endpoint('http://localhost:5000/Wheel/Count')
     write_message("Cron complete. Total wheels in the database is: " + str(total_wheels), True)
+    dataset_complete_time = get_dotnet_complete_endpoint('http://localhost:5000/Wheel/LastDatasetComplete')
+    write_message("Datetime complete set to: " + str(dataset_complete_time), True)
