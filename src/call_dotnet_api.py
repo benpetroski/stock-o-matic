@@ -11,21 +11,36 @@ from multiprocessing import Pool
 
 if len(sys.argv) > 1:
     environment = sys.argv[1]
+else:
+    print("This script requires an environment argument; any one of the following: DEVELOPMENT, STAGING, or PRODUCTION")
+    exit()
+
+def getUrl():
+    if environment == "PRODUCTION":
+        return 'http://localhost:5000'
+    if environment == "STAGING":
+        return 'http://localhost:4999'
+    if environment == "DEVELOPMENT":
+        return 'http://localhost:5000'
+
+url = getUrl()
+accessId = os.environ['WHEEL_SCREENER_ACCESS_GUID']
 
 def write_message(message, withSlack = False):
-    # always print to standard out
-    print(message)
+    envPrependedMessage = f'{environment}: {message}'
+    # always print to stdout
+    print(envPrependedMessage)
     # log to logz API endpoint if in production
     if environment == "PRODUCTION":
-        requests.post('http://localhost:5000/Log/Info', json={'message': message})
+        requests.post(f'{url}/Log/Info', json={'message': envPrependedMessage})
     if withSlack:
-        slack_message(message)
+        slack_message(envPrependedMessage)
 
 def slack_message(message):
     requests.post(os.environ['WHEEL_SCREENER_SLACK_WEBHOOK_URL'], json={'text': message})
 
 def call_dotnet_option_calculator_api(tickerName):
-    response = requests.post('http://localhost:5000/Wheel/' + tickerName)
+    response = requests.post(f'{url}/Wheel/{tickerName}/{accessId}')
     write_message(response.text)
     if response.status_code == 200:
         write_message(tickerName + ' done!')
@@ -96,7 +111,7 @@ if __name__ == '__main__':
     # pool = Pool(processes=5)
     # pool.map(call_dotnet_option_calculator_api, tickers)
 
-    write_message("Starting today's scrape! 🚀", True)
+    write_message("Starting the options retrieval process! 🚀", True)
     totalStoredCount, failedTickers = run_for_tickers(tickers)
     write_message('Options retrieval complete!', True)
     write_message('Failed tickers (' + str(len(failedTickers)) + '):', True)
@@ -115,9 +130,9 @@ if __name__ == '__main__':
 
     # We've tried as much we can, now run the normalization endpoint
     write_message('Calling normalization endpoint...', True)
-    processed_wheels = post_dotnet_count_type_endpoint('http://localhost:5000/Wheel/NormalizeDataset')
+    processed_wheels = post_dotnet_count_type_endpoint(f'{url}/Wheel/NormalizeDataset/{accessId}')
     write_message("The normalization endpoint reported processing " + str(processed_wheels) + " wheels!", True)
-    total_wheels = get_dotnet_count_type_endpoint('http://localhost:5000/Wheel/Count')
-    write_message("Cron complete. Total wheels in the database is: " + str(total_wheels), True)
-    dataset_complete_time = get_dotnet_complete_endpoint('http://localhost:5000/Wheel/LastDatasetComplete')
+    total_wheels = get_dotnet_count_type_endpoint(f'{url}/Wheel/Count')
+    write_message("Cron complete. Total wheels in the database now: " + str(total_wheels), True)
+    dataset_complete_time = get_dotnet_complete_endpoint(f'{url}/Wheel/LastDatasetComplete')
     write_message("Datetime complete set to: " + str(dataset_complete_time), True)
