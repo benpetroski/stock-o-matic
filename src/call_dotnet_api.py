@@ -30,9 +30,8 @@ def write_message(message, withSlack = False):
     envPrependedMessage = f'{environment}: {message}'
     # always print to stdout
     print(envPrependedMessage)
-    # log to logz API endpoint if in production
-    if environment == "PRODUCTION":
-        requests.post(f'{url}/Log/Info', json={'message': envPrependedMessage})
+    # log to logz API endpoint
+    requests.post(f'{url}/Log/Info', json={'message': envPrependedMessage})
     if withSlack:
         slack_message(envPrependedMessage)
 
