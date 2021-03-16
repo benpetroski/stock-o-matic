@@ -20,7 +20,7 @@ def getUrl():
         return 'http://localhost:5000'
     if environment == "STAGING":
         return 'http://localhost:4999'
-    if environment == "DEVELOPMENT":
+    if environment == "DEVELOP":
         return 'http://localhost:5000'
 
 url = getUrl()
@@ -131,7 +131,13 @@ if __name__ == '__main__':
     write_message('Calling normalization endpoint...', True)
     processed_wheels = post_dotnet_count_type_endpoint(f'{url}/Wheel/NormalizeDataset/{accessId}')
     write_message("The normalization endpoint reported processing " + str(processed_wheels) + " wheels!", True)
+    
+    write_message('Calling random hundred endpoint...', True)
+    processed_random_hundred = post_dotnet_count_type_endpoint(f'{url}/Wheel/SetRandomHundred/{accessId}')
+    write_message("The random hundred endpoint reported processing " + str(processed_random_hundred) + " wheels!", True)
+    
     total_wheels = get_dotnet_count_type_endpoint(f'{url}/Wheel/Count')
     write_message("Cron complete. Total wheels in the database now: " + str(total_wheels), True)
+    
     dataset_complete_time = get_dotnet_complete_endpoint(f'{url}/Wheel/LastDatasetComplete')
     write_message("Datetime complete set to: " + str(dataset_complete_time), True)
