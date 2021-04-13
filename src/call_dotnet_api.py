@@ -46,7 +46,7 @@ def call_dotnet_option_calculator_api(tickerName):
         write_message(tickerName + ' done!')
         return int(response.text), ''
     else:
-        write_message(tickerName + ' failed :( Status code: ' + response.status_code)
+        write_message(tickerName + ' failed :( Status code: ' + str(response.status_code))
         return 0, tickerName
 
 def post_dotnet_count_type_endpoint(endpoint):
