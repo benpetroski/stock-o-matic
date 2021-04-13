@@ -40,12 +40,13 @@ def slack_message(message):
 
 def call_dotnet_option_calculator_api(tickerName):
     response = requests.post(f'{url}/Wheel/{tickerName}/{accessId}')
-    write_message(response.text)
+    if response.text != '':
+        write_message(response.text)
     if response.status_code == 200:
         write_message(tickerName + ' done!')
         return int(response.text), ''
     else:
-        write_message(tickerName + ' failed :(')
+        write_message(tickerName + ' failed :( Status code: ' + response.status_code)
         return 0, tickerName
 
 def post_dotnet_count_type_endpoint(endpoint):
