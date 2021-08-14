@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import time
 import requests
 import json
 from bs4 import BeautifulSoup
@@ -40,13 +41,17 @@ class FinvizTicker:
         self.url = 'http://finviz.com/quote.ashx?t=' + self.ticker
 
         # Download the ticker, and parse using beautiful soup
-        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"}
+        # time.sleep(1)
+        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36"}
         response = requests.get(self.url, headers=headers)
         self._data = BeautifulSoup(response.content, 'html.parser')
 
+        if 'Access denied' in self._data.text or 'Error' in self._data.text:
+            raise ConnectionError('Woops, finviz is rate limiting us right now!')
+
         # Check if the page exists - note b for bytes like object
         if b'We cover only stocks and ETFs listed on NYSE, NASDAQ, and AMEX. International and OTC/PK are not available.' in response.content:
-            raise ImportError('Stock ticker \'' + self.ticker + '\' does not exist in the Finviz database.')
+            raise ImportError('Stock ticker \'' + self.ticker + '\' does not exist on the Finviz website.')
 
         # Parse the html and create the metrics dictionary
         self.metrics = self._get_metrics()
@@ -56,21 +61,44 @@ class FinvizTicker:
 
     def _get_metrics(self):
         print('Internal for ' + self.ticker)
+
+        # init vars
+        metrics = {}
+        keys = []
+        values = []
+
+        # Get the sector, industry, and location
+        
+
+        keys.extend(['Sector', 'Industry', 'Country'])
+        values.extend(['','',''])
+
+        fullViewTitle = self._data.find('table', {'class': 'fullview-title'})
+        if fullViewTitle is not None:
+            fullViewLinks = fullViewTitle.find('td', {'class': 'fullview-links'})
+            if fullViewLinks is not None:
+                tabLinks = fullViewLinks.findAll('a', {'class': 'tab-link'})
+                for i in range(0,len(tabLinks)):
+                    values[i] = tabLinks[i].text
+
         # Extract the main table with ticker data and create a list of the rows in the table
         table = self._data.find('table', {'class': 'snapshot-table2'})
+        if table is None:
+            raise ValueError("Table is NoneType dude! BeautifulSoup object: " + self._data.text)
         rows = table.findAll('tr')
 
         # Loop through the rows and build a dictionary of the elements
-        metrics = {}
         for tr in rows:
 
             # Extracts the columns of each row
             cols = tr.findAll('td')
 
+            if cols is None:
+                raise ValueError("Columns weren't found in the table dude!")
+
             # Check if there is an even number of columns (should always be)
             if len(cols) % 2 == 0:
-                keys = []
-                values = []
+                
                 # Extract out the unicode and convert to a raw string
                 data = [ col.text for col in cols ]
 
