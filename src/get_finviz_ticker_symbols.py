@@ -3,7 +3,7 @@ import urllib
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
 
-# Downloads the ticker symbols from finviz and prints the results to file (data/ticker_symbols.dat). This must be run before
+# Downloads the ticker symbols from finviz and prints the results to file (data/ticker_symbols_lists/ticker_symbols.dat). This must be run before
 # get_finviz_data.py.
 def get_table_column(page_num):
     # Download the ticker, and parse using beautiful soup
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     tickers = pool.map(get_table_column, nums)
 
     # Write the stocks to file
-    with open('data/ticker_symbols.dat', 'w') as fp:
+    with open('data/ticker_symbols_lists/ticker_symbols.dat', 'w') as fp:
         for chunk in tickers:
             for ticker in chunk:
                 fp.write('%s\n' % ticker)
