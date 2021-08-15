@@ -92,6 +92,10 @@ def run_for_tickers(tickers):
     return totalStoredCount, failedTickers
 
 if __name__ == '__main__':
+
+    if environment != "PRODUCTION" and environment != "STAGING" and environment != "DEVELOP":
+        print("Please provide a proper environment - either 'PRODUCTION', 'STAGING', or 'DEVELOP'")
+        exit()
     
     # Read in ticker symbol list created by get_finviz_ticker_symbols.py
     if environment == "PRODUCTION":
@@ -101,7 +105,7 @@ if __name__ == '__main__':
         # staging tickers - shorter list (S&P500) in order to test rapidly
         with open('data/ticker_symbols_lists/ticker_symbols_s_and_p.dat') as f:
             tickers = f.readlines()
-    else:
+    if environment == "DEVELOP":
         # dev tickers - extremely short list (FAANMG stocks)
         with open('data/ticker_symbols_lists/ticker_symbols_faanmg.dat') as f:
             tickers = f.readlines()
