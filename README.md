@@ -1,11 +1,22 @@
 # stock-o-matic
 
-## Get On Your Horse
+Run the Finviz scraper for development mode:
 
-Welcome to stock-o-matic, making you ridiculous amounts of money on Wall Street!
+```bash
+cd src
+python3 run_wheel_retreival_process.py DEVELOP
+```
 
-Let's keep it simple: Here's a list of files and what they do (the files they talk to in parenthesis like this)
+For staging:
 
-main.java - some dumb file that has no functionality (talks to nothing because it is nothing)
-parse_html.py - a python script that quickly gets all the stock ticker names on finviz (thank you to devon)
-finvizscraper.py - a python script that systematically pulls all these stock tickers
+```bash
+cd src
+python3 run_wheel_retreival_process.py STAGING
+```
+
+For production:
+
+```bash
+cd src
+python3 run_wheel_retreival_process.py PRODUCTION
+```

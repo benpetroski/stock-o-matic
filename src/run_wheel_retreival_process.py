@@ -69,7 +69,7 @@ def get_dotnet_complete_endpoint(endpoint):
     response = requests.get(endpoint)
     if response.status_code == 200:
         data = response.json()
-        return data['lastDatasetComplete']
+        return data['datasetCompleteDateTime']
     else:
         return 0
 
@@ -95,11 +95,15 @@ if __name__ == '__main__':
     
     # Read in ticker symbol list created by get_finviz_ticker_symbols.py
     if environment == "PRODUCTION":
-        with open('data/ticker_symbols.dat') as f:
+        with open('data/ticker_symbols_lists/ticker_symbols.dat') as f:
+            tickers = f.readlines()
+    if environment == "STAGING":
+        # staging tickers - shorter list (S&P500) in order to test rapidly
+        with open('data/ticker_symbols_lists/ticker_symbols_s_and_p.dat') as f:
             tickers = f.readlines()
     else:
-        # dev tickers - shorter list (S&P500) in order to test rapidly
-        with open('data/ticker_symbols_s_and_p.dat') as f:
+        # dev tickers - extremely short list (FAANMG stocks)
+        with open('data/ticker_symbols_lists/ticker_symbols_faanmg.dat') as f:
             tickers = f.readlines()
 
     # Clear ticker symbols of new line character
@@ -140,5 +144,5 @@ if __name__ == '__main__':
     total_wheels = get_dotnet_count_type_endpoint(f'{url}/Wheel/Count')
     write_message("Cron complete. Total wheels in the database now: " + str(total_wheels), True)
     
-    dataset_complete_time = get_dotnet_complete_endpoint(f'{url}/Wheel/LastDatasetComplete')
-    write_message("Datetime complete set to: " + str(dataset_complete_time), True)
+    dataset_complete_time = get_dotnet_complete_endpoint(f'{url}/DataSetInfo/MostRecent')
+    write_message("Datetime complete was set to (via GET at /DataSetInfo/MostRecent): " + str(dataset_complete_time), True)

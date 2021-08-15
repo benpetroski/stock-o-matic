@@ -4,7 +4,7 @@ import pandas as pd
 
 def get_ticker_names():
 	# Read in ticker symbol list as created by get_finviz_ticker_symbols.py
-	with open('data/ticker_symbols.dat') as f:
+	with open('data/ticker_symbols_lists/ticker_symbols.dat') as f:
 	    tickers = f.readlines()
 
 	tickers[:] = [x.rstrip("\n") for x in tickers]

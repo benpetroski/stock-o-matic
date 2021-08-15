@@ -28,7 +28,7 @@ top50Dict['metrictype'] = 'top50'
 top50Dict['version'] = 'v1'
 
 # Read in ticker symbol list as created by get_finviz_ticker_symbols.py
-with open('data/ticker_symbols.dat') as f:
+with open('data/ticker_symbols_lists/ticker_symbols.dat') as f:
     tickers = f.readlines()
 
 # Read in metric names
