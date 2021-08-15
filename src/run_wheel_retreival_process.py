@@ -97,11 +97,12 @@ if __name__ == '__main__':
     if environment == "PRODUCTION":
         with open('data/ticker_symbols_lists/ticker_symbols.dat') as f:
             tickers = f.readlines()
+    if environment == "STAGING":
+        # staging tickers - shorter list (S&P500) in order to test rapidly
+        with open('data/ticker_symbols_lists/ticker_symbols_s_and_p.dat') as f:
+            tickers = f.readlines()
     else:
-        # dev tickers - shorter list (S&P500) in order to test rapidly
-        # with open('data/ticker_symbols_lists/ticker_symbols_s_and_p.dat') as f:
-        #     tickers = f.readlines()
-        # for very quick tests - extremely short list (FAANMG stocks)
+        # dev tickers - extremely short list (FAANMG stocks)
         with open('data/ticker_symbols_lists/ticker_symbols_faanmg.dat') as f:
             tickers = f.readlines()
 
