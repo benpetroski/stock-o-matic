@@ -93,15 +93,18 @@ def run_for_tickers(tickers):
         write_message(str(i+1) + ' of ' + str(len(tickers)) + '...')
         with open('data/tickers/' + tickers[i] + '.json') as f:
             metrics = json.load(f)
-            if metrics['Optionable']:
-                count, tickerName = call_dotnet_option_calculator_api(tickers[i])
-                totalStoredCount += count
-                # if ticker name is not an empty string, there was some sort of error with retrieval
-                if tickerName != '':
-                    failedTickers.append(tickerName)
-                    
-                # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
-                time.sleep(0.6)
+            try:
+                if metrics['Optionable']:
+                    count, tickerName = call_dotnet_option_calculator_api(tickers[i])
+                    totalStoredCount += count
+                    # if ticker name is not an empty string, there was some sort of error with retrieval
+                    if tickerName != '':
+                        failedTickers.append(tickerName)
+                        
+                    # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
+                    time.sleep(0.6)
+            except:
+                write_message(f'Error retrieving options for {tickers[i]}, skiping...')
     return totalStoredCount, failedTickers
 
 def retrieve_intraday_data(tickers):
@@ -111,15 +114,18 @@ def retrieve_intraday_data(tickers):
         write_message(str(i+1) + ' of ' + str(len(tickers)) + '...')
         with open('data/tickers/' + tickers[i] + '.json') as f:
             metrics = json.load(f)
-            if metrics['Optionable']:
-                count, tickerName = call_dotnet_intraday_data_api(tickers[i])
-                totalStoredCount += count
-                # if ticker name is not an empty string, there was some sort of error with retrieval
-                if tickerName != '':
-                    failedTickers.append(tickerName)
-                    
-                # Alpaca rate limit is max 200 calls per minute, so we do 1 call ever 0.4 seconds for 150 per minute
-                time.sleep(0.4)
+            try:
+                if metrics['Optionable']:
+                    count, tickerName = call_dotnet_intraday_data_api(tickers[i])
+                    totalStoredCount += count
+                    # if ticker name is not an empty string, there was some sort of error with retrieval
+                    if tickerName != '':
+                        failedTickers.append(tickerName)
+                        
+                    # Alpaca rate limit is max 200 calls per minute, so we do 1 call ever 0.4 seconds for 150 per minute
+                    time.sleep(0.4)
+            except:
+                write_message(f'Error retrieving intraday data for {tickers[i]}, skiping...')
     return totalStoredCount, failedTickers
 
 if __name__ == '__main__':
@@ -150,7 +156,7 @@ if __name__ == '__main__':
     # Processes need to be throttled to prevent rate limiting by TDAmeritrade
     # pool = Pool(processes=5)
     # pool.map(call_dotnet_option_calculator_api, tickers)
-    write_message("Retrieving intraday price data from Alpha Vantage...", True)
+    write_message("Retrieving intraday price data from Alpaca paper trading API...", True)
     retrieve_intraday_data(tickers)
     write_message("Intraday data retrieval complete!", True)
 
