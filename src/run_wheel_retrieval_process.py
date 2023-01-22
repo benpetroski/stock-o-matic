@@ -187,9 +187,4 @@ if __name__ == '__main__':
     write_message("Datetime complete was set to (via GET at /DataSetInfo/MostRecent): " + str(dataset_complete_time), True)
 
     # Post to heartbeat endpoint
-    url = os.environ['OPTION_DATASET_HEARTBEAT_PRODUCTION']
-
-    if environment == "STAGING": 
-        url = os.environ['OPTION_DATASET_HEARTBEAT_STAGING']
-
-    post_endpoint(url)
+    post_endpoint(os.environ['OPTION_DATASET_HEARTBEAT_ENDPOINT'])
