@@ -21,10 +21,17 @@ class FinvizTicker:
         # Convert the string to uppercase
         self.ticker = ticker.upper()
 
-        print("Constructing " + self.ticker + "...")
-
         # Current timestamp
         self.time_stamp = datetime.now(eastern).strftime(lastUpdatedFormat)
+
+        # First check if the file exists
+        try:
+            with open('data/tickers/' + self.ticker + '.json', 'r') as json_file:
+                pass
+        except FileNotFoundError:
+            print("Ticker file doesn't exist, creating it...")
+            with open('data/tickers/' + self.ticker + '.json', 'w') as json_file:
+                json.dump({}, json_file)
 
         # First check if we've already written this in the past day
         with open('data/tickers/' + self.ticker + '.json', 'r') as json_file:
@@ -32,7 +39,7 @@ class FinvizTicker:
             try:
                 lastUpdated = data[lastUpdatedKeyName]
                 if lastUpdated == self.time_stamp:
-                    print("We've already got this ticker's data for the day! Try again tomorrow :)")
+                    print("We've already got this ticker's data for the day! We'll again tomorrow :)")
                     return
             except:
                 print("No 'lastUpdated' key found, gonna go ahead and scrape this ticker!")
@@ -47,7 +54,9 @@ class FinvizTicker:
         self._data = BeautifulSoup(response.content, 'html.parser')
 
         if 'Access denied' in self._data.text or 'Error' in self._data.text:
-            raise ConnectionError('Woops, finviz is rate limiting us right now!')
+            print('Woops, Finviz is rate limiting us right now! Gonna sleep for one minute...')
+            time.sleep(60)
+            raise ConnectionError('rate limited by Finviz')
 
         # Check if the page exists - note b for bytes like object
         if b'We cover only stocks and ETFs listed on NYSE, NASDAQ, and AMEX. International and OTC/PK are not available.' in response.content:
@@ -60,8 +69,6 @@ class FinvizTicker:
         self.write_metrics()
 
     def _get_metrics(self):
-        print('Internal for ' + self.ticker)
-
         # init vars
         metrics = {}
         keys = []

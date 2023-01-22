@@ -7,7 +7,6 @@ from multiprocessing import Pool
 # get_finviz_data.py.
 def get_table_column(page_num):
     # Download the ticker, and parse using beautiful soup
-    print(page_num)
     params = urllib.parse.urlencode({'v': 111, 'r': page_num})
     headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"}
     response = requests.get("https://finviz.com/screener.ashx?%s" % params, headers=headers)
@@ -16,8 +15,12 @@ def get_table_column(page_num):
     # initialize stocks array
     stocks = []
 
+    # print current page of total (total from page scrape)
+    total = data.find('td', {'class': 'count-text'})
+    print(page_num + " of " + total.split(' ')[1] + " tickers...")
+
     # Get the main table and remove the first header row
-    table = data.find('table', {'bgcolor': '#d3d3d3'})
+    table = data.find('table', {'class': 'table-light'})
     if table is not None:
         rows = table.findAll('tr')
         rows.pop(0)
@@ -30,7 +33,7 @@ def get_table_column(page_num):
             stocks.append(str(link[0].text))
     else:
         print("damn, table is NoneType!")
-        print(response.content)
+        # print(response.content)
 
     return stocks
 
