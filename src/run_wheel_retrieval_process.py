@@ -4,8 +4,6 @@ import requests
 import time
 import json
 import os
-from FinvizTicker import FinvizTicker
-from multiprocessing import Pool
 
 # This script runs every day at 5AM to get all contracts in the market
 
@@ -49,6 +47,18 @@ def call_dotnet_option_calculator_api(tickerName):
         write_message(tickerName + ' failed :( Status code: ' + str(response.status_code))
         return 0, tickerName
 
+def call_dotnet_intraday_data_api(tickerName):
+    write_message('Calling intraday data endpoint for ' + tickerName)
+    response = requests.post(f'{url}/IntradayData/{tickerName}/{accessId}')
+    if response.text != '':
+        write_message(response.text)
+    if response.status_code == 200:
+        write_message(tickerName + ' done!')
+        return 1, ''
+    else:
+        write_message(tickerName + ' failed :( Status code: ' + str(response.status_code))
+        return 0, tickerName
+
 def post_dotnet_count_type_endpoint(endpoint):
     response = requests.post(endpoint)
     if response.status_code == 200:
@@ -56,6 +66,9 @@ def post_dotnet_count_type_endpoint(endpoint):
         return int(data['count'])
     else:
         return 0
+
+def post_endpoint(url: str):
+    response = requests.post(url)
 
 def get_dotnet_count_type_endpoint(endpoint):
     response = requests.get(endpoint)
@@ -83,12 +96,30 @@ def run_for_tickers(tickers):
             if metrics['Optionable']:
                 count, tickerName = call_dotnet_option_calculator_api(tickers[i])
                 totalStoredCount += count
-                # if ticker name is not an emptry string, there was some sort of error with retrieval
+                # if ticker name is not an empty string, there was some sort of error with retrieval
                 if tickerName != '':
                     failedTickers.append(tickerName)
                     
                 # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
                 time.sleep(0.6)
+    return totalStoredCount, failedTickers
+
+def retrieve_intraday_data(tickers):
+    failedTickers = []
+    totalStoredCount = 0
+    for i in range(0, len(tickers)):
+        write_message(str(i+1) + ' of ' + str(len(tickers)) + '...')
+        with open('data/tickers/' + tickers[i] + '.json') as f:
+            metrics = json.load(f)
+            if metrics['Optionable']:
+                count, tickerName = call_dotnet_intraday_data_api(tickers[i])
+                totalStoredCount += count
+                # if ticker name is not an empty string, there was some sort of error with retrieval
+                if tickerName != '':
+                    failedTickers.append(tickerName)
+                    
+                # Alpaca rate limit is max 200 calls per minute, so we do 1 call ever 0.4 seconds for 150 per minute
+                time.sleep(0.4)
     return totalStoredCount, failedTickers
 
 if __name__ == '__main__':
@@ -106,8 +137,9 @@ if __name__ == '__main__':
         with open('data/ticker_symbols_lists/ticker_symbols_s_and_p.dat') as f:
             tickers = f.readlines()
     if environment == "DEVELOP":
-        # dev tickers - extremely short list (FAANMG stocks)
-        with open('data/ticker_symbols_lists/ticker_symbols_faanmg.dat') as f:
+        # dev tickers - extremely short list of some select tickers (or uncomment the line below to use the S&P500 list)
+        with open('data/ticker_symbols_lists/ticker_symbols_development.dat') as f:
+        # with open('data/ticker_symbols_lists/ticker_symbols_s_and_p.dat') as f:
             tickers = f.readlines()
 
     # Clear ticker symbols of new line character
@@ -118,6 +150,9 @@ if __name__ == '__main__':
     # Processes need to be throttled to prevent rate limiting by TDAmeritrade
     # pool = Pool(processes=5)
     # pool.map(call_dotnet_option_calculator_api, tickers)
+    write_message("Retrieving intraday price data from Alpha Vantage...", True)
+    retrieve_intraday_data(tickers)
+    write_message("Intraday data retrieval complete!", True)
 
     write_message("Starting the options retrieval process! 🚀", True)
     totalStoredCount, failedTickers = run_for_tickers(tickers)
@@ -150,3 +185,11 @@ if __name__ == '__main__':
     
     dataset_complete_time = get_dotnet_complete_endpoint(f'{url}/DataSetInfo/MostRecent')
     write_message("Datetime complete was set to (via GET at /DataSetInfo/MostRecent): " + str(dataset_complete_time), True)
+
+    # Post to heartbeat endpoint
+    url = os.environ['OPTION_DATASET_HEARTBEAT_PRODUCTION']
+
+    if environment == "STAGING": 
+        url = os.environ['OPTION_DATASET_HEARTBEAT_STAGING']
+
+    post_endpoint(url)

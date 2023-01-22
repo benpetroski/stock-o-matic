@@ -7,15 +7,11 @@ def scrape_ticker(tickername):
     try:
         FinvizTicker(tickername)
     except ConnectionError as e:
-        print("ConnectionError thrown in FinvizTicker:")
         print(e)
-        time.sleep(60)
     except Exception as e:
-        print("Exception thrown in FinvizTicker:")
         print(e)
-    finally:
-        print("Continuing...")
 
+count = 0
 
 if __name__ == '__main__':
 
@@ -25,7 +21,9 @@ if __name__ == '__main__':
 
         # Clear ticker symbols of new line character
         for i, ticker in enumerate(tickers):
+            print(str(count) + " of " +  str(len(ticker)) + "; ticker: " + ticker)
             tickers[i] = ticker.replace('\n', '')
+            count = count + 1
 
     # Start processes, as they empty, a new case is fed in
     # Processes may need to be tuned to prevent being rate limited by finviz
