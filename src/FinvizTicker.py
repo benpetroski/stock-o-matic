@@ -39,21 +39,25 @@ class FinvizTicker:
             try:
                 lastUpdated = data[lastUpdatedKeyName]
                 if lastUpdated == self.time_stamp:
-                    print("We've already got this ticker's data for the day! We'll again tomorrow :)")
+                    print("We've already got this ticker's data (" + self.ticker + ") for the day! We'll try again tomorrow :)")
                     return
             except:
-                print("No 'lastUpdated' key found, gonna go ahead and scrape this ticker!")
+                print("No 'lastUpdated' key found, gonna go ahead and scrape this ticker! (", self.ticker, ")")
 
         # Construct the url from the ticker
         self.url = 'http://finviz.com/quote.ashx?t=' + self.ticker
 
         # Download the ticker, and parse using beautiful soup
         # time.sleep(1)
-        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36"}
+        # headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36"}
+        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 9_9_3; en-US) Gecko/20130401 Firefox/72.9"}
         response = requests.get(self.url, headers=headers)
         self._data = BeautifulSoup(response.content, 'html.parser')
-
-        if 'Access denied' in self._data.text or 'Error' in self._data.text:
+        print(len(self._data.text))
+        # this is poor, if the scrape includes these words by coincidence, we'll get a false positive
+        # better would be to use request library to check the status code
+        if  len(self._data.text) < 5000 and ('Access denied' in self._data.text or 'Error' in self._data.text):
+            print(self._data.text)
             print('Woops, Finviz is rate limiting us right now! Gonna sleep for one minute...')
             time.sleep(60)
             raise ConnectionError('rate limited by Finviz')
@@ -63,6 +67,7 @@ class FinvizTicker:
             raise ImportError('Stock ticker \'' + self.ticker + '\' does not exist on the Finviz website.')
 
         # Parse the html and create the metrics dictionary
+        print("Getting metrics for ticker: " + self.ticker)
         self.metrics = self._get_metrics()
 
         # Write metrics to json
@@ -75,10 +80,8 @@ class FinvizTicker:
         values = []
 
         # Get the sector, industry, and location
-        
-
-        keys.extend(['Sector', 'Industry', 'Country'])
-        values.extend(['','',''])
+        keys.extend(['Sector', 'Industry', 'Country', 'Exchange'])
+        values.extend(['','','', ''])
 
         fullViewTitle = self._data.find('table', {'class': 'fullview-title'})
         if fullViewTitle is not None:
@@ -96,7 +99,6 @@ class FinvizTicker:
 
         # Loop through the rows and build a dictionary of the elements
         for tr in rows:
-
             # Extracts the columns of each row
             cols = tr.findAll('td')
 
@@ -216,6 +218,7 @@ class FinvizTicker:
             else:
                 raise ImportError('Dude, the finviz table doesn''t have an even number of columns!')
 
+        print("Got metrics for ticker: " + self.ticker)
         return metrics
     
     # metrics writer
