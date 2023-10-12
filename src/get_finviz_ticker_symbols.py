@@ -16,11 +16,12 @@ def get_table_column(page_num):
     stocks = []
 
     # print current page of total (total from page scrape)
-    total = data.find('td', {'class': 'count-text'})
-    print(page_num + " of " + total.split(' ')[1] + " tickers...")
+    # total = data.find('td', {'class': 'count-text'})
+    # if total is not None:
+    #     print(str(page_num) + " of " + total.split(' ')[1] + " tickers...")
 
     # Get the main table and remove the first header row
-    table = data.find('table', {'class': 'table-light'})
+    table = data.find('table', {'class': 'screener_table'})
     if table is not None:
         rows = table.findAll('tr')
         rows.pop(0)
@@ -31,8 +32,13 @@ def get_table_column(page_num):
             cols = row.findAll('td')
             link = cols[1].findAll('a')
             stocks.append(str(link[0].text))
+        
+        # print the stocks we just got
+        print(stocks)
     else:
         print("damn, table is NoneType!")
+        # print url we are currently on
+        print("https://finviz.com/screener.ashx?%s" % params)
         # print(response.content)
 
     return stocks
@@ -43,9 +49,12 @@ if __name__ == '__main__':
     headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"}
     response = requests.get("https://finviz.com/screener.ashx", headers=headers)
     data = BeautifulSoup(response.content, 'html.parser')
-    element = data.find('td', {'class': 'count-text'})
-    num = str(element.text)
-    num_stocks = int(num[6:-3])
+    element = data.find('div', {'id': 'screener-total'})
+    total_text = element.text.strip()
+    num_stocks = total_text.split()[-2]
+
+    # Convert to int
+    num_stocks = int(num_stocks)
 
     # Generate array of url params for starting index of stock i.e. https://finviz.com/screener.ashx?v=111&r=61
     nums = range(1, num_stocks+1, 20)
