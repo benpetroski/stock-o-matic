@@ -156,9 +156,9 @@ if __name__ == '__main__':
     # Processes need to be throttled to prevent rate limiting by TDAmeritrade
     # pool = Pool(processes=5)
     # pool.map(call_dotnet_option_calculator_api, tickers)
-    # write_message("Retrieving intraday price data from Alpaca paper trading API...", True)
-    # retrieve_intraday_data(tickers)
-    # write_message("Intraday data retrieval complete!", True)
+    write_message("Retrieving intraday price data from Alpaca paper trading API...", True)
+    retrieve_intraday_data(tickers)
+    write_message("Intraday data retrieval complete!", True)
 
     write_message("Starting the options retrieval process! 🚀", True)
     totalStoredCount, failedTickers = run_for_tickers(tickers)
