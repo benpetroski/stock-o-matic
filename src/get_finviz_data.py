@@ -2,6 +2,7 @@
 import time
 from FinvizTicker import FinvizTicker
 from multiprocessing import Pool
+from slack_utils import slack_message
 
 def scrape_ticker(tickername):
     try:
@@ -14,6 +15,8 @@ def scrape_ticker(tickername):
 count = 0
 
 if __name__ == '__main__':
+
+    slack_message("Starting to get Finviz data for each symbol!")
 
     # Read in ticker symbol list created by get_finviz_ticker_symbols.py
     with open('data/ticker_symbols_lists/ticker_symbols.dat') as f:

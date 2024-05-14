@@ -148,12 +148,17 @@ class FinvizTicker:
                     value = value.replace('%', '')
                     value = value.replace(',', '')
 
-                    # shortable / optionable 'Yes'
-                    if value == "Yes":
+                    # remove front and back parentheses
+                    value = value.replace('(', '')
+                    value = value.replace(')', '')
+
+                    # TODO: fix this so we can also add shortable somehow
+                    # Option/Short 'Yes / Yes'
+                    if value == "Yes / Yes" or value == "Yes / No":
                         values.append(True)
                         continue
-                    # shortable / optionable 'No'
-                    if value == "No":
+                    # Option/Short 'Yes / No'
+                    if value == "No / Yes" or value == "No / No":
                         values.append(False)
                         continue
                     # earnings string has month and day, just append this value as string
@@ -216,7 +221,7 @@ class FinvizTicker:
                 # Add the key value pair to the metric list
                 metrics.update(zip(keys, values))
             else:
-                raise ImportError('Dude, the finviz table doesn''t have an even number of columns!')
+                raise ImportError("Dude, the finviz table doesn't have an even number of columns!")
 
         print("Got metrics for ticker: " + self.ticker)
         return metrics
