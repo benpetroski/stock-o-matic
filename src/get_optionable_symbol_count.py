@@ -1,7 +1,7 @@
-
-
 import json
-
+import os
+import requests
+from slack_utils import slack_message
 
 if __name__ == '__main__':
     # loop at all tickers in data/ticker_symbols_lists/ticker_symbols/.dat
@@ -23,7 +23,7 @@ if __name__ == '__main__':
             with open('data/tickers/' + ticker + '.json') as f:
                 metrics = json.load(f)
                 try:
-                    if metrics['Optionable']:
+                    if metrics['OptionShort']:
                         count += 1
                 except KeyError:
                     print("Ticker has no optionable value: " + ticker)
@@ -34,3 +34,4 @@ if __name__ == '__main__':
     print(count)
     print("Unknown Ticker Count: ")
     print(unknownCount)
+    slack_message("Optionable Ticker Count: " + str(count) + "\nUnknown Ticker Count: " + str(unknownCount))

@@ -25,14 +25,16 @@ As of early 2023, the total number of tickers finviz tracks is 8,364. This scrip
 
 As of late 2023, the total number of tickers finviz tracks is 8,682.
 
-Then, separate .json files (one per ticker with all metrics) can be created for each ticker by running:
+As of mid 2024, the total number of tickers finviz tracks is 9510.
+
+Then, separate .json files (one per ticker with all metric values inside of it) can be created for each ticker by running:
 
 ```bash
 cd src
 python3 get_finviz_data.py
 ```
 
-This script has to visit any new tickers and any old tickers that need updates, and can take up to 2-3 hours to run.
+This script will visit any new tickers and any old tickers that need updates, and can take up to 2-3 hours to run.
 
 Then, to get the count of optionable tickers, run:
 
@@ -40,6 +42,8 @@ Then, to get the count of optionable tickers, run:
 cd src
 python3 get_optionable_symbol_count.py
 ```
+
+As of mid 2024, the total number of optionable tickers was 123.
 
 Run the .NET option downloader for development environment:
 

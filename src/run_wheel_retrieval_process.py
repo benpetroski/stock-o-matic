@@ -4,8 +4,9 @@ import requests
 import time
 import json
 import os
+from slack_utils import slack_message
 
-# This script runs every day at 5AM to get all contracts in the market
+# This script runs every day at ~5AM to get all contracts in the market
 
 if len(sys.argv) > 1:
     environment = sys.argv[1]
@@ -32,9 +33,6 @@ def write_message(message, withSlack = False):
     requests.post(f'{url}/Log/Info', json={'message': envPrependedMessage})
     if withSlack:
         slack_message(envPrependedMessage)
-
-def slack_message(message):
-    requests.post(os.environ['WHEEL_SCREENER_SLACK_WEBHOOK_URL'], json={'text': message})
 
 def call_dotnet_option_calculator_api(tickerName):
     response = requests.post(f'{url}/Wheel/{tickerName}/{accessId}')
@@ -106,7 +104,7 @@ def run_for_tickers(tickers):
         with open('data/tickers/' + tickers[i] + '.json') as f:
             metrics = json.load(f)
             try:
-                if metrics['Optionable']:
+                if metrics['OptionShort']:
                     # first get the actual options for the ticker
                     count, tickerName = call_dotnet_option_calculator_api(tickers[i])
                     if count > 0:
@@ -133,7 +131,7 @@ def retrieve_intraday_data(tickers):
         with open('data/tickers/' + tickers[i] + '.json') as f:
             metrics = json.load(f)
             try:
-                if metrics['Optionable']:
+                if metrics['OptionShort']:
                     count, tickerName = call_dotnet_intraday_data_api(tickers[i])
                     call_dotnet_stock_api(tickers[i])
                     totalStoredCount += count
