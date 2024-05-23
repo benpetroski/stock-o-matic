@@ -103,26 +103,23 @@ def run_for_tickers(tickers):
     totalStoredCount = 0
     for i in range(0, len(tickers)):
         write_message(str(i+1) + ' of ' + str(len(tickers)) + '...')
-        with open('data/tickers/' + tickers[i] + '.json') as f:
-            metrics = json.load(f)
-            try:
-                if metrics['OptionShort']:
+        # with open('data/tickers/' + tickers[i] + '.json') as f:
+        #     metrics = json.load(f)
+        #     try:
+        #         if metrics['OptionShort']:
                     # first get the actual options for the ticker
-                    count, tickerName = call_dotnet_option_calculator_api(tickers[i])
-                    if count > 0:
-                        # then get the intraday data for the ticker - goes in IntradayData table
-                        call_dotnet_intraday_data_api(tickers[i])
-                        # then get the stock data for the ticker - goes in Stock table
-                        call_dotnet_stock_api(tickers[i])
-                    totalStoredCount += count
-                    # if ticker name is not an empty string, there was some sort of error with retrieval
-                    if tickerName != '':
-                        failedTickers.append(tickerName)
-                        
-                    # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
-                    time.sleep(0.6)
-            except:
-                write_message(f'Error retrieving options for {tickers[i]}, skipping...')
+        count, tickerName = call_dotnet_option_calculator_api(tickers[i])
+        if count > 0:
+            # then get the intraday data for the ticker - goes in IntradayData table
+            call_dotnet_intraday_data_api(tickers[i])
+            # then get the stock data for the ticker - goes in Stock table
+            call_dotnet_stock_api(tickers[i])
+        totalStoredCount += count
+        # if ticker name is not an empty string, there was some sort of error with retrieval
+        if tickerName != '':
+            failedTickers.append(tickerName)
+            # except:
+            #     write_message(f'Error retrieving options for {tickers[i]}, skipping...')
     return totalStoredCount, failedTickers
 
 def retrieve_intraday_data(tickers):
