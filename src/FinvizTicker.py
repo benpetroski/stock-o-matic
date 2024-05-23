@@ -86,7 +86,7 @@ class FinvizTicker:
         quoteLinks = self._data.find('div', {'class': 'quote-links'})
         if quoteLinks is not None:
             tabLinks = quoteLinks.findAll('a', {'class': 'tab-link'})
-            for i in range(0,3):
+            for i in range(0,4):
                 if tabLinks[i] is None:
                     continue
                 text = tabLinks[i].text.strip()
@@ -127,10 +127,16 @@ class FinvizTicker:
                 # for each value, clean up value 
                 for value in data[1::2]:
                     value = str(value)
-                    # empty values
+                    # empty values - en dash
                     if value == '-':
                         values.append('')
                         continue
+                    
+                    # empty values — em dash
+                    if value == '—':
+                        values.append('')
+                        continue
+
                     # for the rare triple dash!
                     if value == '- - -':
                         values.append('')

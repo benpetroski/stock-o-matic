@@ -2,4 +2,8 @@
 
 from FinvizTicker import FinvizTicker
 
-FinvizTicker("A")
+# first argument is the ticker
+import sys
+ticker = sys.argv[1]
+
+FinvizTicker(ticker)
