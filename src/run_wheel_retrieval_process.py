@@ -174,7 +174,6 @@ if __name__ == '__main__':
         tickers = tickers[start_index:]
 
     # Start processes, as they empty, a new case is fed in
-    # Processes need to be throttled to prevent rate limiting by TDAmeritrade
     # pool = Pool(processes=5)
     # pool.map(call_dotnet_option_calculator_api, tickers)
     # write_message("Retrieving intraday price data from Alpaca paper trading API...", True)
