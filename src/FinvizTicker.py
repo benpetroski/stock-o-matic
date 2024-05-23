@@ -83,13 +83,14 @@ class FinvizTicker:
         keys.extend(['Sector', 'Industry', 'Country', 'Exchange'])
         values.extend(['','','', ''])
 
-        fullViewTitle = self._data.find('table', {'class': 'fullview-title'})
-        if fullViewTitle is not None:
-            fullViewLinks = fullViewTitle.find('td', {'class': 'fullview-links'})
-            if fullViewLinks is not None:
-                tabLinks = fullViewLinks.findAll('a', {'class': 'tab-link'})
-                for i in range(0,len(tabLinks)):
-                    values[i] = tabLinks[i].text
+        quoteLinks = self._data.find('div', {'class': 'quote-links'})
+        if quoteLinks is not None:
+            tabLinks = quoteLinks.findAll('a', {'class': 'tab-link'})
+            for i in range(0,3):
+                if tabLinks[i] is None:
+                    continue
+                text = tabLinks[i].text.strip()
+                values[i] = text
 
         # Extract the main table with ticker data and create a list of the rows in the table
         table = self._data.find('table', {'class': 'snapshot-table2'})
@@ -165,6 +166,33 @@ class FinvizTicker:
                     if value[0:3] in months:
                         values.append(value)
                         continue
+                    # category also has a dash, but could have the following
+                    if 'US Equities -' in value:
+                        values.append(value)
+                        continue
+                    if 'Bonds -' in value:
+                        values.append(value)
+                        continue
+                    if 'Global or ExUS Equities -' in value:
+                        values.append(value)
+                        continue
+                    
+                    if 'Commodities & Metals -' in value:
+                        values.append(value)
+                        continue
+
+                    if 'Target Date / Multi-Asset' in value:
+                        values.append(value)
+                        continue
+
+                    if 'Equity -' in value:
+                        values.append(value)
+                        continue
+
+                    if 'Equities -' in value:
+                        values.append(value)
+                        continue
+
                     # 52 week range has this dash, split to array and convert to float
                     if ' - ' in value:
                         rangeValues = value.split(' - ')
