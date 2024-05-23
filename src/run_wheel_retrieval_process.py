@@ -7,9 +7,11 @@ import os
 from slack_utils import slack_message
 
 # This script runs every day at ~5AM to get all contracts in the market
+start_at = None
 
 if len(sys.argv) > 1:
     environment = sys.argv[1]
+    start_at = sys.argv[2] if len(sys.argv) > 2 else None
 else:
     print("This script requires an environment argument; any one of the following: DEVELOPMENT, STAGING, or PRODUCTION")
     exit()
@@ -120,7 +122,7 @@ def run_for_tickers(tickers):
                     # TDAmeritrade is max 120 calls per minute, so we do 1 call ever 0.6 seconds for 100 per minute
                     time.sleep(0.6)
             except:
-                write_message(f'Error retrieving options for {tickers[i]}, skiping...')
+                write_message(f'Error retrieving options for {tickers[i]}, skipping...')
     return totalStoredCount, failedTickers
 
 def retrieve_intraday_data(tickers):
@@ -169,6 +171,11 @@ if __name__ == '__main__':
     for i, ticker in enumerate(tickers):
         tickers[i] = ticker.replace('\n', '')
 
+    # If a 'start_at' was passed, we will only run the tickers after that ticker
+    if start_at is not None:
+        start_index = tickers.index(start_at)
+        tickers = tickers[start_index:]
+
     # Start processes, as they empty, a new case is fed in
     # Processes need to be throttled to prevent rate limiting by TDAmeritrade
     # pool = Pool(processes=5)
@@ -177,7 +184,11 @@ if __name__ == '__main__':
     # retrieve_intraday_data(tickers)
     # write_message("Alpaca intraday data retrieval complete!", True)
 
-    write_message("Starting the options retrieval process! 🚀", True)
+    if start_at is not None:
+        write_message("Starting the options retrieval process from ticker " + start_at + "! 🚀", True)
+    else:
+        write_message("Starting the options retrieval process! 🚀", True)
+    
     totalStoredCount, failedTickers = run_for_tickers(tickers)
     write_message('Options retrieval complete!', True)
     write_message('Failed tickers (' + str(len(failedTickers)) + '):', True)
@@ -205,5 +216,6 @@ if __name__ == '__main__':
     dataset_complete_time = get_dotnet_complete_endpoint(f'{url}/DataSetInfo/MostRecent')
     write_message("Datetime complete was set to (via GET at /DataSetInfo/MostRecent): " + str(dataset_complete_time), True)
 
-    # Post to heartbeat endpoint
-    post_endpoint(os.environ['OPTION_DATASET_HEARTBEAT_ENDPOINT'])
+    # if in staging or production, Post to heartbeat endpoint
+    if environment == "STAGING" or environment == "PRODUCTION":
+        post_endpoint(os.environ['OPTION_DATASET_HEARTBEAT_ENDPOINT'])

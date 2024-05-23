@@ -14,6 +14,8 @@ if __name__ == '__main__':
     with open('data/ticker_symbols_lists/ticker_symbols.dat') as f:
         tickers = f.readlines()
 
+        optionable_tickers = []
+
         # Clear ticker symbols of new line character
         for i, ticker in enumerate(tickers):
             # remove the new line character
@@ -25,6 +27,7 @@ if __name__ == '__main__':
                 try:
                     if metrics['OptionShort']:
                         count += 1
+                        optionable_tickers.append(ticker)
                 except KeyError:
                     print("Ticker has no optionable value: " + ticker)
                     unknownCount += 1
@@ -35,3 +38,8 @@ if __name__ == '__main__':
     print("Unknown Ticker Count: ")
     print(unknownCount)
     slack_message("Optionable Ticker Count: " + str(count) + "\nUnknown Ticker Count: " + str(unknownCount))
+
+    # Write the optionable tickers to a file
+    with open('data/ticker_symbols_lists/optionable_tickers.dat', 'w') as fp:
+        for ticker in optionable_tickers:
+            fp.write('%s\n' % ticker)
