@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 
-tickerToTest = 'DPZ'
+tickerToTest = 'ZZZ'
 
 class TestGetSingleTicker(unittest.TestCase):
 
@@ -13,7 +13,7 @@ class TestGetSingleTicker(unittest.TestCase):
             os.remove('data/tickers/'+ tickerToTest + '.json')
 
         # Run the script to generate the JSON file
-        os.system('python get_single_ticker.py ' + tickerToTest)
+        os.system('python3 get_single_ticker.py ' + tickerToTest)
 
     def test_json_file(self):
         file_path = 'data/tickers/' + tickerToTest + '.json'

@@ -42,7 +42,11 @@ def call_dotnet_option_calculator_api(tickerName):
         write_message(response.text)
     if response.status_code == 200:
         write_message(tickerName + ' done!')
-        return int(response.text), ''
+        # try to convert message to int, if it is not an int, it is some other message, return 0
+        try:
+            return int(response.text), ''
+        except:
+            return 0, tickerName
     else:
         write_message(tickerName + ' failed :( Status code: ' + str(response.status_code))
         return 0, tickerName
