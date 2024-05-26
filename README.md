@@ -21,6 +21,26 @@ cd src
 python3 get_finviz_ticker_symbols.py
 ```
 
+## Supabase Uploads
+
+You can upload the raw JSON to supabase by first creating a table with the following:
+
+```sql
+CREATE TABLE finviz (
+    ticker TEXT PRIMARY KEY,
+    data JSONB,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+Then within `src/.env` provide the following environment variables:
+
+```bash
+export SUPABASE_URL=https://<your_supabase_url>.supabase.co
+export SUPABASE_KEY=<your_supabase_key>
+```
+
+
 As of early 2023, the total number of tickers finviz tracks is 8,364. This script takes about 2 minutes to run.
 
 As of late 2023, the total number of tickers finviz tracks is 8,682.
