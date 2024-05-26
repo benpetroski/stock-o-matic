@@ -9,3 +9,6 @@
 # TODO: got rate limited on the server, so we're back to checking these in
 # We've moved the actual data retrieval to the server, so we can ignore the data files
 # src/data/tickers/*.json
+
+# .env within src/
+src/.env
